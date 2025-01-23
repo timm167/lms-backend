@@ -18,7 +18,6 @@ class IsTeacherOrAdmin(permissions.BasePermission):
     Custom permission to only allow teachers and admins to create lessons and courses.
     """
     def has_permission(self, request, view):
-        # Allow access only if the user is a teacher
         return hasattr(request.user, 'teacher') or request.user.is_staff
 
 # Users
