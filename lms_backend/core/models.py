@@ -1,6 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-from .managers import CourseManager, StudentManager, TeacherManager, AdminManager
+from django.contrib.auth.models import AbstractBaseUser
+from .managers import CourseManager, StudentManager, TeacherManager, AdminManager, UserManager
 
 # Model notes:
 # - The User model is a subclass of Django’s AbstractUser model.
@@ -35,23 +35,39 @@ from .managers import CourseManager, StudentManager, TeacherManager, AdminManage
 # User models
 #------------------------------------------------------------#
 
-# Base class User: Contains common user properties
-class User(AbstractUser):
-    pass
+# User model remains unchanged
+class User(AbstractBaseUser):
+    username = models.CharField(max_length=255, unique=True)
+    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
+
+    objects = UserManager()
+
+    def __str__(self):
+        return self.username
+
 
 # Subclass Student: Specific functionality for students
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    enrolled_courses = models.ManyToManyField('Course', related_name='students', blank=True)
+    enrolled_courses = models.ManyToManyField('Course', related_name='students_in_course', blank=True)
     objects = StudentManager()
 
     def __str__(self):
         return self.user.username
 
+
 # Subclass Teacher: Specific functionality for teachers
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    teaching_courses = models.ManyToManyField('Course', related_name='teachers', blank=True)
+    teaching_courses = models.ManyToManyField('Course', related_name='teachers_in_course', blank=True)
     objects = TeacherManager()
 
     def __str__(self):
@@ -67,17 +83,14 @@ class Admin(models.Model):
         return f"{self.user.username} ({self.role})"
 
 
-#------------------------------------------------------------#
 # Course models
-#------------------------------------------------------------#
-
 class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     instructor = models.ForeignKey(Teacher, related_name="courses_taught", on_delete=models.SET_NULL, null=True, blank=True)
     students = models.ManyToManyField(Student, related_name="courses_enrolled", blank=True)
-    lessons = models.ManyToManyField("Lesson", related_name="courses", blank=True)
-    assignments = models.ManyToManyField("Assignment", related_name="courses", blank=True)
+    lessons = models.ManyToManyField("Lesson", related_name="courses_with_lessons", blank=True)
+    assignments = models.ManyToManyField("Assignment", related_name="courses_with_assignments", blank=True)
     duration_weeks = models.IntegerField()
     start_date = models.DateField()
     end_date = models.DateField()
@@ -86,9 +99,10 @@ class Course(models.Model):
     def __str__(self):
         return self.title
 
+
 # A lesson within a course
 class Lesson(models.Model):
-    course = models.ForeignKey(Course, related_name="lessons", on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name="lessons_in_course", on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     content = models.TextField()
     lesson_no = models.IntegerField() 
@@ -97,9 +111,10 @@ class Lesson(models.Model):
     def __str__(self):
         return self.title
 
+
 # An assignment within a course
 class Assignment(models.Model):
-    course = models.ForeignKey(Course, related_name="assignments", on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name="assignments_in_course", on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
     due_date = models.DateTimeField()
@@ -109,15 +124,15 @@ class Assignment(models.Model):
     def __str__(self):
         return self.title
 
+
 # A model to represent a student's enrollment in a course
 class Enrollment(models.Model):
     student = models.ForeignKey(Student, related_name="enrollments", on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, related_name="enrollments", on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name="enrollments_in_course", on_delete=models.CASCADE)
     enrollment_date = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
-    lessons_completed = models.ManyToManyField(Lesson, related_name="completed_by", blank=True)
-    assignments_completed = models.ManyToManyField(Assignment, related_name="completed_by", blank=True)
+    lessons_completed = models.ManyToManyField(Lesson, related_name="completed_by_students", blank=True)
+    assignments_completed = models.ManyToManyField(Assignment, related_name="completed_by_students", blank=True)
     
     def __str__(self):
         return f"{self.student.username} enrolled in {self.course.title}"
-
