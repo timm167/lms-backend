@@ -48,7 +48,7 @@ class User(AbstractBaseUser):
         ('teacher', 'Teacher'),
         ('student', 'Student'),
     ]
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
