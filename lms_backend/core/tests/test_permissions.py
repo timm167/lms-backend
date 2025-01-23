@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
-from core.models import Lesson, User
+from core.models import Lesson, User, Course
 
 
 ## ---------------------------------------------------- 
@@ -380,7 +380,10 @@ class LessonAssignmentPermissionTests(APITestCase):
             role='student', 
             email='student@example.com'
         )
+        
+        self.course = Course.objects.create(title='Test Course', description='Test Description', instructor=self.teacher_user.teacher)
 
+        
 
     # Lesson View Permissions
 
@@ -536,4 +539,87 @@ class AssignmentPermissionTests(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+class EnrollmentPermissionTests(APITestCase):
+
+    # Setup
+    def setUp(self):
+        User.objects.all().delete()  
+        self.admin_user = User.objects.create_user(
+            username='admin', 
+            password='password', 
+            role='admin', 
+            is_staff=True, 
+            email='admin@example.com'
+        )
+        self.teacher_user = User.objects.create_user(
+            username='teacher', 
+            password='password', 
+            role='teacher', 
+            email='teacher@example.com'
+        )
+        self.student_user = User.objects.create_user(
+            username='student', 
+            password='password', 
+            role='student', 
+            email='student@example.com'
+        )
+
+
+    # Enrollment View Permissions
+    def test_admin_can_access_enrollment_view(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('enrollment-list-create')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)  
+
+    def test_teacher_cannot_access_enrollment_view(self):
+        self.client.login(username='teacher', password='password')
+        url = reverse('enrollment-list-create')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
     
+    def test_student_can_access_enrollment_view(self):
+        self.client.login(username='student', password='password')
+        url = reverse('enrollment-list-create')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    # Enrollment Creation Permissions
+
+    def test_admin_can_access_enrollment_creation(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('enrollment-list-create')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_teacher_cannot_access_enrollment_creation(self):
+        self.client.login(username='teacher', password='password')
+        url = reverse('enrollment-list-create')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_student_can_access_enrollment_creation(self):
+        self.client.login(username='student', password='password')
+        url = reverse('enrollment-list-create')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    
+    # Enrollment Deletion Permissions
+
+    def test_admin_can_delete_enrollment(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('enrollment-detail', args=[1])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_teacher_cannot_delete_enrollment(self):
+        self.client.login(username='teacher', password='password')
+        url = reverse('enrollment-detail', args=[1])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_student_cannot_delete_enrollment(self):
+        self.client.login(username='student', password='password')
+        url = reverse('enrollment-detail', args=[1])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
