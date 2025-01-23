@@ -13,12 +13,38 @@ from core.serializers import (
     EnrollmentSerializer,
 )
 
+## Custom Permissions
+def user_view_only_permissions(self):
+    if self.request.method == 'DELETE':
+
+        return [IsTeacherOrAdmin()]
+    elif self.request.method == 'PUT' or self.request.method == 'PATCH':
+
+        return [IsTeacherOrAdmin()]
+
+    return [IsAuthenticated()]
+
+
+def teacher_student_view_only_permissions(self):
+    if self.request.method == 'DELETE':
+
+        return [IsTeacherOrAdmin()]
+    elif self.request.method == 'PUT' or self.request.method == 'PATCH':
+
+        return [IsTeacherOrAdmin()]
+
+    return [IsAuthenticated()]
+
+## Custom permission classes
 class IsTeacherOrAdmin(permissions.BasePermission):
     """
     Custom permission to only allow teachers and admins to create lessons and courses.
     """
     def has_permission(self, request, view):
         return hasattr(request.user, 'teacher') or request.user.is_staff
+
+
+## -- CRUD Permissions -- ##
 
 # Users
 class UserListCreateView(generics.ListCreateAPIView):
@@ -56,7 +82,9 @@ class TeacherListCreateView(generics.ListCreateAPIView):
 class TeacherDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
-    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        return teacher_student_view_only_permissions(self)
 
 # Courses
 class CourseListCreateView(generics.ListCreateAPIView):
@@ -68,7 +96,9 @@ class CourseListCreateView(generics.ListCreateAPIView):
 class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        return user_view_only_permissions(self)
 
 #Lessons
 class LessonListCreateView(generics.ListCreateAPIView):
@@ -80,7 +110,9 @@ class LessonListCreateView(generics.ListCreateAPIView):
 class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        return user_view_only_permissions(self)
 
 # Assignments
 class AssignmentListCreateView(generics.ListCreateAPIView):
@@ -92,8 +124,10 @@ class AssignmentListCreateView(generics.ListCreateAPIView):
 class AssignmentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
-    permission_classes = [IsAuthenticated]
 
+    def get_permissions(self):
+        return user_view_only_permissions(self)
+    
 # Enrollments
 class EnrollmentListCreateView(generics.ListCreateAPIView):
     queryset = Enrollment.objects.all()
