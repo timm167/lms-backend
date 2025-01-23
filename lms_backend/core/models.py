@@ -27,15 +27,13 @@ from .managers import CourseManager, StudentManager, TeacherManager, AdminManage
 # Future models:
 # - Add a model for storing student grades.
 # - Add a model for storing student submissions.
-# - Add a model for storing cross-course materials.
 # - Add a model for storing completed courses.
-# - Each enrollment should track the student's progress in the course.
 
 #------------------------------------------------------------#
 # User models
 #------------------------------------------------------------#
 
-# User model remains unchanged
+# User model: AbstractBaseUser subclass
 class User(AbstractBaseUser):
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(unique=True)
@@ -45,13 +43,29 @@ class User(AbstractBaseUser):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
+    ROLE_CHOICES = [
+        ('admin', 'Admin'),
+        ('teacher', 'Teacher'),
+        ('student', 'Student'),
+    ]
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
 
     objects = UserManager()
 
+    def is_admin(self):
+        return self.role == 'admin'
+
+    def is_teacher(self):
+        return self.role == 'teacher'
+
+    def is_student(self):
+        return self.role == 'student'
+
     def __str__(self):
-        return self.username
+        return f"{self.username} ({self.role})"
 
 
 # Subclass Student: Specific functionality for students
@@ -78,6 +92,7 @@ class Teacher(models.Model):
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # Link to the User model
     objects = AdminManager()
+    is_staff = models.BooleanField(default=True)
     
     def __str__(self):
         return f"{self.user.username} ({self.role})"
