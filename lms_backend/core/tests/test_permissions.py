@@ -356,6 +356,7 @@ class CoursePermissionTests(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+## This covers assignments also
 class LessonAssignmentPermissionTests(APITestCase):
 
     # Setup
@@ -383,7 +384,7 @@ class LessonAssignmentPermissionTests(APITestCase):
         
         self.course = Course.objects.create(title='Test Course', description='Test Description', instructor=self.teacher_user.teacher)
 
-        
+
 
     # Lesson View Permissions
 
@@ -451,94 +452,6 @@ class LessonAssignmentPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class AssignmentPermissionTests(APITestCase):
-
-    # Setup
-    def setUp(self):
-        User.objects.all().delete()  
-        self.admin_user = User.objects.create_user(
-            username='admin', 
-            password='password', 
-            role='admin', 
-            is_staff=True, 
-            email='admin@example.com'
-        )
-        self.teacher_user = User.objects.create_user(
-            username='teacher', 
-            password='password', 
-            role='teacher', 
-            email='teacher@example.com'
-        )
-        self.student_user = User.objects.create_user(
-            username='student', 
-            password='password', 
-            role='student', 
-            email='student@example.com'
-        )
-
-
-    # Assignment View Permissions
-    def test_admin_can_access_assignment_view(self):
-        self.client.login(username='admin', password='password')
-        url = reverse('assignment-list-create')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_teacher_can_access_assignment_view(self):
-        self.client.login(username='teacher', password='password')
-        url = reverse('assignment-list-create')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_student_cannot_access_assignment_view(self):
-        self.client.login(username='student', password='password')
-        url = reverse('assignment-list-create')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    # Assignment Creation Permissions
-
-    def test_admin_can_access_assignment_creation(self):
-        self.client.login(username='admin', password='password')
-        url = reverse('assignment-list-create')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_teacher_can_access_assignment_creation(self):
-        self.client.login(username='teacher', password='password')
-        url = reverse('assignment-list-create')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_student_cannot_access_assignment_creation(self):
-        self.client.login(username='student', password='password')
-        url = reverse('assignment-list-create')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    # Assignment Deletion Permissions
-
-    def test_admin_can_delete_assignment(self):
-        lesson = Lesson.objects.create(title='Test Lesson', content='Test Content', lesson_no=1)
-        self.client.login(username='admin', password='password')
-        url = reverse('assignment-detail', args=[lesson.id])
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
-    def test_teacher_can_delete_assignment(self):
-        lesson = Lesson.objects.create(title='Test Lesson', content='Test Content', lesson_no=1)
-        self.client.login(username='teacher', password='password')
-        url = reverse('assignment-detail', args=[lesson.id])
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
-    def test_student_cannot_delete_assignment(self):
-        lesson = Lesson.objects.create(title='Test Lesson', content='Test Content', lesson_no=1)
-        self.client.login(username='student', password='password')
-        url = reverse('assignment-detail', args=[lesson.id])
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
 class EnrollmentPermissionTests(APITestCase):
 
     # Setup
@@ -564,6 +477,9 @@ class EnrollmentPermissionTests(APITestCase):
             email='student@example.com'
         )
 
+        self.course = Course.objects.create(title='Test Course', description='Test Description', instructor=self.teacher_user.teacher)
+        self.enrollment_date = '2021-01-01'
+        self.student = self.student_user.student
 
     # Enrollment View Permissions
     def test_admin_can_access_enrollment_view(self):
