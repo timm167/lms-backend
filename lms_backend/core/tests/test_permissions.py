@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
-from core.models import Lesson, User, Course
+from core.models import Lesson, User, Course, Teacher, Enrollment
 
 
 ## ---------------------------------------------------- 
@@ -14,7 +14,6 @@ from core.models import Lesson, User, Course
 class UserPermissionTests(APITestCase):
 
     # Setup
-
     def setUp(self):
         User.objects.all().delete()  
         self.admin_user = User.objects.create_user(
@@ -104,6 +103,7 @@ class TeacherPermissionTests(APITestCase):
     # Setup
     def setUp(self):
         User.objects.all().delete()  
+        Teacher.objects.all().delete()
         self.admin_user = User.objects.create_user(
             username='admin', 
             password='password', 
@@ -111,18 +111,21 @@ class TeacherPermissionTests(APITestCase):
             is_staff=True, 
             email='admin@example.com'
         )
+
         self.teacher_user = User.objects.create_user(
             username='teacher', 
             password='password', 
             role='teacher', 
-            email='teacher@example.com'
+            email='teacher@example.com',
         )
+
         self.student_user = User.objects.create_user(
             username='student', 
             password='password', 
             role='student', 
             email='student@example.com'
         )
+ 
 
     # Teacher View Permissions
     def test_admin_can_access_teacher_view(self):
@@ -166,10 +169,16 @@ class TeacherPermissionTests(APITestCase):
     # Teacher Deletion Permissions
 
     def test_admin_can_delete_teacher(self):
+
         self.client.login(username='admin', password='password')
-        url = reverse('teacher-detail', args=[self.teacher_user.id])
+        url = reverse('teacher-detail', args=[self.teacher_user.teacher.id])
         response = self.client.delete(url)
+
+        # Check if the teacher still exists
+        teacher_exists = Teacher.objects.filter(id=self.teacher_user.teacher.id).exists()
+
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(teacher_exists)
 
     def test_teacher_cannot_delete_teacher(self):
         self.client.login(username='teacher', password='password')
@@ -254,7 +263,7 @@ class StudentPermissionTests(APITestCase):
 
     def test_admin_can_delete_student(self):
         self.client.login(username='admin', password='password')
-        url = reverse('student-detail', args=[self.student_user.id])
+        url = reverse('student-detail', args=[self.student_user.student.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -295,6 +304,8 @@ class CoursePermissionTests(APITestCase):
             role='student', 
             email='student@example.com'
         )
+
+        self.course = Course.objects.create(title='Test Course', description='Test Description', instructor=self.teacher_user.teacher)
 
 
     # Course View Permissions
@@ -478,8 +489,7 @@ class EnrollmentPermissionTests(APITestCase):
         )
 
         self.course = Course.objects.create(title='Test Course', description='Test Description', instructor=self.teacher_user.teacher)
-        self.enrollment_date = '2021-01-01'
-        self.student = self.student_user.student
+        self.enrollment = Enrollment.objects.create(student=self.student_user.student, course=self.course, enrollment_date='2021-01-01')
 
     # Enrollment View Permissions
     def test_admin_can_access_enrollment_view(self):
@@ -493,12 +503,34 @@ class EnrollmentPermissionTests(APITestCase):
         url = reverse('enrollment-list-create')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    
-    def test_student_can_access_enrollment_view(self):
-        self.client.login(username='student', password='password')
-        url = reverse('enrollment-list-create')
+
+    def test_teacher_can_view_enrollments_on_own_courses(self):
+        self.client.login(username='teacher', password='password')
+        url = reverse('enrollment-detail', args=[self.enrollment.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_teacher_cannot_view_enrollments_on_other_courses(self):
+        other_course = Course.objects.create(title='Other Course', description='Other Description', instructor=self.admin_user)
+        other_enrollment = Enrollment.objects.create(student=self.other_student_user.student, course=other_course, enrollment_date=self.enrollment_date)
+        self.client.login(username='teacher', password='password')
+        url = reverse('enrollment-detail', args=[other_enrollment.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_student_can_view_own_enrollment(self):
+        enrollment = Enrollment.objects.create(student=self.student_user.student, course=self.course, enrollment_date=self.enrollment_date)
+        self.client.login(username='student', password='password')
+        url = reverse('enrollment-detail', args=[enrollment.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_student_cannot_view_others_enrollment(self):
+        enrollment = Enrollment.objects.create(student=self.other_student_user.student, course=self.course, enrollment_date=self.enrollment_date)
+        self.client.login(username='student', password='password')
+        url = reverse('enrollment-detail', args=[enrollment.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # Enrollment Creation Permissions
 
@@ -508,34 +540,61 @@ class EnrollmentPermissionTests(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_student_can_create_own_enrollment(self):
+        self.client.login(username='student', password='password')
+        url = reverse('enrollment-list-create')
+        data = {'course': self.course.id, 'enrollment_date': self.enrollment_date}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_admin_can_create_enrollment_for_student(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('enrollment-list-create')
+        data = {'student': self.student_user.student.id, 'course': self.course.id, 'enrollment_date': self.enrollment_date}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
     def test_teacher_cannot_access_enrollment_creation(self):
         self.client.login(username='teacher', password='password')
         url = reverse('enrollment-list-create')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_student_can_access_enrollment_creation(self):
+    def test_student_cannot_create_enrollment_for_others(self):
         self.client.login(username='student', password='password')
         url = reverse('enrollment-list-create')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {'student': self.other_student_user.student.id, 'course': self.course.id, 'enrollment_date': self.enrollment_date}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     
     # Enrollment Deletion Permissions
 
     def test_admin_can_delete_enrollment(self):
+        enrollment = Enrollment.objects.create(student=self.student_user.student, course=self.course, enrollment_date=self.enrollment_date)
         self.client.login(username='admin', password='password')
-        url = reverse('enrollment-detail', args=[1])
+        url = reverse('enrollment-detail', args=[enrollment.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_teacher_cannot_delete_enrollment(self):
+        enrollment = Enrollment.objects.create(student=self.student_user.student, course=self.course, enrollment_date=self.enrollment_date)
         self.client.login(username='teacher', password='password')
-        url = reverse('enrollment-detail', args=[1])
+        url = reverse('enrollment-detail', args=[enrollment.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_student_cannot_delete_enrollment(self):
+    def test_student_can_delete_own_enrollment(self):
+        enrollment = Enrollment.objects.create(student=self.student_user.student, course=self.course, enrollment_date=self.enrollment_date)
         self.client.login(username='student', password='password')
-        url = reverse('enrollment-detail', args=[1])
+        url = reverse('enrollment-detail', args=[enrollment.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_student_cannot_delete_others_enrollment(self):
+        enrollment = Enrollment.objects.create(student=self.other_student_user.student, course=self.course, enrollment_date=self.enrollment_date)
+        self.client.login(username='student', password='password')
+        url = reverse('enrollment-detail', args=[enrollment.id])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+

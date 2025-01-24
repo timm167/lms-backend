@@ -1,20 +1,33 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager
 
+
 # Manager for the User model
 class UserManager(BaseUserManager):
-    def create_user(self, username, password=None, **extra_fields):
+    def create_user(self, username, password=None, role=None, **extra_fields):
+        from .models import Student, Teacher, Admin
+        """
+        Create and return a regular user with a role (student, teacher, admin).
+        """
         if not username:
             raise ValueError('The Username must be set')
+
+        # Create the base user first
         user = self.model(username=username, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
-        return user
 
-    def create_superuser(self, username, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        return self.create_user(username, password, **extra_fields)
+        # Based on the role, create the corresponding model (Teacher, Admin, Student)
+        if role == 'student':
+            Student.objects.create(user=user)
+        elif role == 'teacher':
+            Teacher.objects.create(user=user)
+        elif role == 'admin':
+            Admin.objects.create(user=user)
+        else:
+            raise ValueError("Invalid role specified")
+
+        return user
 
 
 # Manager for the Course model
@@ -88,12 +101,8 @@ class AdminManager(models.Manager):
             instructor=instructor
         )
         return course
-    
-    def delete_course(self, course):
-        """Delete a course (admins can delete courses)."""
-        course.delete()
 
-    def create_user(self, username, password, role):
+    def create_user(self, username, password, role, **extra_fields):
         from .models import User, Student, Teacher, Admin
         """Create a new user (student, teacher, or admin)."""
         user = User.objects.create_user(username=username, password=password)
@@ -102,12 +111,9 @@ class AdminManager(models.Manager):
         elif role == 'teacher':
             Teacher.objects.create(user=user)
         elif role == 'admin':
-            Admin.objects.create(user=user)
+            Admin.objects.create(user=user, is_staff=True)
         return user
     
-    def delete_user(self, user):
-        """Admins can delete users."""
-        user.delete()
 
 class TeacherManager(models.Manager):
 
