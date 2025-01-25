@@ -1,4 +1,4 @@
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, SAFE_METHODS
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, SAFE_METHODS, BasePermission
 from rest_framework import permissions
 
 from rest_framework import generics
@@ -22,20 +22,35 @@ class IsTeacherOrAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return hasattr(request.user, 'teacher') or request.user.is_staff
     
-class IsStudentOrAdmin(permissions.BasePermission):
+class IsStudentOrAdmin(BasePermission):
     """
-    Custom permission to only allow students and admins to create lessons and courses.
+    Custom permission to only allow students and admins to create enrollments.
     """
     def has_permission(self, request, view):
         if request.method == 'POST':
-            return request.user.is_authenticated and request.user.role == 'student'
+            # Allow both students and admins to create enrollments
+            return request.user.is_authenticated and ((request.user.role == 'student')  or request.user.is_staff)
+        # Allow only students and admins to access the view
         return request.user.is_authenticated and (request.user.role == 'student' or request.user.is_staff)
-         
+
     def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS or request.method == 'DELETE':
+        # Allow students to view and delete their own enrollments
+        if request.method in ['GET', 'DELETE']:
             return obj.student.user == request.user or request.user.is_staff
         return request.user.is_authenticated and request.user.is_staff
-    
+     
+
+class IsStudentOrTeacherOrAdmin(BasePermission):
+    """
+    Custom permission to only allow students, teachers, and admins to access the view.
+    """
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (request.user.role == 'student' or request.user.role == 'teacher' or request.user.is_staff)
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_authenticated and (obj.student.user == request.user or obj.course.instructor == request.user or request.user.is_staff)
+
+
 
 # CRUD Permissions for Views
 
@@ -123,6 +138,7 @@ class AssignmentDetailView(generics.RetrieveUpdateDestroyAPIView):
             return [IsTeacherOrAdmin()]
         return [IsAuthenticated()]
 
+
 # Enrollments
 class EnrollmentListCreateView(generics.ListCreateAPIView):
     serializer_class = EnrollmentSerializer
@@ -132,23 +148,27 @@ class EnrollmentListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         if user.is_staff:
             return Enrollment.objects.all()
+        elif user.role == 'teacher':
+            return Enrollment.objects.filter(course__instructor=user.teacher)
         return Enrollment.objects.filter(student__user=user)
 
     def perform_create(self, serializer):
-        # Set the student to the current user
-        serializer.save(student=self.request.user.student)
+        if self.request.user.role == 'teacher':
+            self.permission_denied(self.request, message="Only students and admins can create enrollments.")
+        elif self.request.user.role == 'student':
+            student = serializer.validated_data['student']
+            if student.user == self.request.user:
+                serializer.save(student=self.request.user.student)
+        elif self.request.user.is_staff:
+            serializer.save()
 
 class EnrollmentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
 
     def get_permissions(self):
-        if self.request.method in ['DELETE', 'PUT', 'PATCH']:
+        if self.request.method in [ 'PUT', 'PATCH']:
+            return [IsAdminUser()]
+        if self.request.method in ['DELETE']:
             return [IsStudentOrAdmin()]
-        return [IsAuthenticated()]
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.is_staff:
-            return Enrollment.objects.all()
-        return Enrollment.objects.filter(student__user=user)
+        return [IsStudentOrTeacherOrAdmin()]

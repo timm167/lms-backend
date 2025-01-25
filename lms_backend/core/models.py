@@ -106,9 +106,6 @@ class Course(models.Model):
     students = models.ManyToManyField(Student, related_name="courses_enrolled", blank=True)
     lessons = models.ManyToManyField("Lesson", related_name="courses_with_lessons", blank=True)
     assignments = models.ManyToManyField("Assignment", related_name="courses_with_assignments", blank=True)
-    duration_weeks = models.IntegerField(null=True, blank=True)
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
     objects = CourseManager()
 
     def __str__(self):
@@ -146,8 +143,6 @@ class Enrollment(models.Model):
     course = models.ForeignKey(Course, related_name="enrollments_in_course", on_delete=models.CASCADE)
     enrollment_date = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
-    lessons_completed = models.ManyToManyField(Lesson, related_name="completed_by_students", blank=True)
-    assignments_completed = models.ManyToManyField(Assignment, related_name="completed_by_students", blank=True)
     
     def __str__(self):
         return f"{self.student.username} enrolled in {self.course.title}"

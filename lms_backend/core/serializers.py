@@ -79,9 +79,6 @@ class CourseSerializer(serializers.ModelSerializer):
             'students', 
             'lessons', 
             'assignments', 
-            'duration_weeks', 
-            'start_date', 
-            'end_date'
         ]
 
 
@@ -90,11 +87,8 @@ class CourseSerializer(serializers.ModelSerializer):
 from .models import Enrollment
 
 class EnrollmentSerializer(serializers.ModelSerializer):
-    student = StudentSerializer()
-    course = CourseSerializer()
-    lessons_completed = serializers.PrimaryKeyRelatedField(queryset=Lesson.objects.all(), many=True)
-    assignments_completed = serializers.PrimaryKeyRelatedField(queryset=Assignment.objects.all(), many=True)
-
+    student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())
+    course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
     class Meta:
         model = Enrollment
-        fields = ['id', 'student', 'course', 'enrollment_date', 'completed', 'lessons_completed', 'assignments_completed']
+        fields = ['id', 'student', 'course', 'enrollment_date', 'completed']
