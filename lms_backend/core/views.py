@@ -60,6 +60,11 @@ class UserListCreateView(generics.ListCreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser]
 
+    def get(self, request, *args, **kwargs):
+        print("Request received in ProtectedView")
+        print("Authorization header:", request.headers.get('Authorization'))
+        return super().get(request, *args, **kwargs)
+
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -80,7 +85,9 @@ class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
 class TeacherListCreateView(generics.ListCreateAPIView):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
+    
     permission_classes = [IsAdminUser]
+
 
 class TeacherDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Teacher.objects.all()
@@ -114,6 +121,17 @@ class LessonListCreateView(generics.ListCreateAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsTeacherOrAdmin]
 
+    def perform_create(self, serializer):
+        print("creating lesson")
+        course = Course.objects.get(id=self.request.data.get('course_id'))
+        Lesson.objects.create_lesson(
+            course=course,
+            title=self.request.data.get('title'),
+            content=self.request.data.get('content'),
+            lesson_no=self.request.data.get('lesson_no'),
+            video_url=self.request.data.get('video_url')
+        )
+
 class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
@@ -128,6 +146,8 @@ class AssignmentListCreateView(generics.ListCreateAPIView):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
     permission_classes = [IsTeacherOrAdmin]
+
+    
 
 class AssignmentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Assignment.objects.all()

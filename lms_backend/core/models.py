@@ -1,6 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser
-from .managers import CourseManager, StudentManager, TeacherManager, AdminManager, UserManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from .managers import CourseManager, StudentManager, TeacherManager, AdminManager, UserManager, LessonManager, AssignmentManager
 
 # Model notes:
 # - The User model is a subclass of Django’s AbstractUser model.
@@ -50,10 +50,22 @@ class User(AbstractBaseUser):
     ]
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
 
+
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
 
     objects = UserManager()
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.role == 'student' and not hasattr(self, 'student'):
+            Student.objects.get_or_create(user=self)
+        elif self.role == 'teacher' and not hasattr(self, 'teacher'):
+            Teacher.objects.get_or_create(user=self)
+        elif self.role == 'admin' and not hasattr(self, 'admin'):
+            Admin.objects.get_or_create(user=self)
+
+        
 
     def is_admin(self):
         return self.role == 'admin'
@@ -63,6 +75,12 @@ class User(AbstractBaseUser):
 
     def is_student(self):
         return self.role == 'student'
+    
+    def has_perm(self, perm, obj=None):
+        return self.is_superuser 
+
+    def has_module_perms(self, app_label):
+        return self.is_superuser 
 
     def __str__(self):
         return f"{self.username} ({self.role})"
@@ -90,12 +108,12 @@ class Teacher(models.Model):
 
 # Subclass Admin: Specific functionality for admins
 class Admin(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)  # Link to the User model
+    user = models.OneToOneField(User, on_delete=models.CASCADE) 
     objects = AdminManager()
     is_staff = models.BooleanField(default=True)
     
     def __str__(self):
-        return f"{self.user.username} ({self.role})"
+        return f"{self.user.username} ({self.user.role})"
 
 
 # Course models
@@ -103,7 +121,7 @@ class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     instructor = models.ForeignKey(Teacher, related_name="courses_taught", on_delete=models.SET_NULL, null=True, blank=True)
-    students = models.ManyToManyField(Student, related_name="courses_enrolled", blank=True)
+    students = models.ManyToManyField("Student", related_name="courses_enrolled", blank=True)
     lessons = models.ManyToManyField("Lesson", related_name="courses_with_lessons", blank=True)
     assignments = models.ManyToManyField("Assignment", related_name="courses_with_assignments", blank=True)
     objects = CourseManager()
@@ -116,12 +134,14 @@ class Course(models.Model):
 class Lesson(models.Model):
     course = models.ForeignKey(Course, related_name="lessons_in_course", on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
-    content = models.TextField()
+    content = models.TextField(blank=True, null=True)
     lesson_no = models.IntegerField(null=True, blank=True) 
     video_url = models.URLField(blank=True, null=True)
+    objects = LessonManager()
 
     def __str__(self):
         return self.title
+    
 
 
 # An assignment within a course
@@ -132,6 +152,7 @@ class Assignment(models.Model):
     due_date = models.DateTimeField(null=True, blank=True)
     max_score = models.IntegerField(null=True, blank=True)
     pass_score = models.IntegerField(null=True, blank=True)
+    objects = AssignmentManager()
 
     def __str__(self):
         return self.title
@@ -145,4 +166,4 @@ class Enrollment(models.Model):
     completed = models.BooleanField(default=False)
     
     def __str__(self):
-        return f"{self.student.username} enrolled in {self.course.title}"
+        return f"{self.student.user.username} enrolled in {self.course.title}"

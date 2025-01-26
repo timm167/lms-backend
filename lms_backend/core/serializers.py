@@ -49,6 +49,22 @@ class LessonSerializer(serializers.ModelSerializer):
         model = Lesson
         fields = ['id', 'course', 'title', 'content', 'lesson_no', 'video_url']
 
+    def create(self, validated_data):
+        course = validated_data.get('course')
+        title = validated_data.get('title')
+        content = validated_data.get('content')
+        lesson_no = validated_data.get('lesson_no')
+        video_url = validated_data.get('video_url')
+        
+        lesson = Lesson.objects.create(
+            course=course,
+            title=title,
+            content=content,
+            lesson_no=lesson_no,
+            video_url=video_url
+        )
+        return lesson
+
 #-----------------------------------------------------------#
 
 from .models import Assignment
@@ -67,7 +83,6 @@ class CourseSerializer(serializers.ModelSerializer):
     students = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all(), many=True)
     assignments = serializers.PrimaryKeyRelatedField(queryset=Assignment.objects.all(), many=True)
     lessons = serializers.PrimaryKeyRelatedField(queryset=Lesson.objects.all(), many=True)
-    
     
     class Meta:
         model = Course

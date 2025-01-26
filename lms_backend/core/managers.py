@@ -4,43 +4,47 @@ from django.contrib.auth.models import BaseUserManager
 
 # Manager for the User model
 class UserManager(BaseUserManager):
-    def create_user(self, username, password=None, role=None, **extra_fields):
-        from .models import Student, Teacher, Admin
+
+    def create_user(self, username, password=None, role='student', **extra_fields):
         """
-        Create and return a regular user with a role (student, teacher, admin).
+        Create and return a regular user.
         """
         if not username:
-            raise ValueError('The Username must be set')
+            raise ValueError('The username must be set')
+        if not password:
+            raise ValueError('The password must be set')
 
-        # Create the base user first
-        user = self.model(username=username, **extra_fields)
+        user = self.model(username=username, role=role, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
-
-        # Based on the role, create the corresponding model (Teacher, Admin, Student)
-        if role == 'student':
-            Student.objects.create(user=user)
-        elif role == 'teacher':
-            Teacher.objects.create(user=user)
-        elif role == 'admin':
-            Admin.objects.create(user=user)
-        else:
-            raise ValueError("Invalid role specified")
-
         return user
 
+    def create_superuser(self, username, password=None, **extra_fields):
+        """
+        Create and return a superuser.
+        """
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(username, password, role='admin', **extra_fields)
 
 # Manager for the Course model
 class CourseManager(models.Manager):
-
     def enroll_student(self, student):
         """Enroll a student in the course."""
         self.students.add(student) 
         print(f"{student.username} enrolled in {self.title}.")
 
     def unenroll_student(self, student):
+        from .models import Enrollments
         """Unenroll a student from the course."""
-        self.students.remove(student)  
+        self.students.remove(student)
+        Enrollments.objects.filter(student=student, course=self).delete()
         print(f"{student.username} unenrolled from {self.title}.")
 
     def add_teacher(self, teacher):
@@ -66,9 +70,12 @@ class CourseManager(models.Manager):
     def remove_assignment(self, assignment):
         """Remove an assignment from the course."""
         self.assignments.remove(assignment)
+
+    actions = ['enroll_student', 'unenroll_student', 'add_teacher', 'remove_teacher', 'add_lesson', 'remove_lesson', 'add_assignment', 'remove_assignment']
     
 # Manager for the Student model
 class StudentManager(models.Manager):
+    
     def browse_courses(self):
         from .models import Course
         """Return a list of all available courses."""
@@ -89,6 +96,11 @@ class StudentManager(models.Manager):
     def list_enrolled_courses(self):
         """Return the list of courses the student is enrolled in."""
         return self.enrolled_courses.all()
+    
+    def delete_user(self):
+        """Delete the student's user account."""
+        self.user.delete()
+        return f"{self.user.username} has been deleted."
     
 
 class AdminManager(models.Manager):
@@ -164,3 +176,25 @@ class TeacherManager(models.Manager):
         )
         self.teaching_courses.add(course)
         return course
+    
+class LessonManager(models.Manager):
+    def create_lesson(self, course, title, content, lesson_no, video_url):
+        """Create a lesson and add it to the course."""
+        lesson = self.create(course=course, title=title, content=content, lesson_no=lesson_no, video_url=video_url)
+        course.lessons.add(lesson)
+        return lesson
+    
+    
+class AssignmentManager(models.Manager):
+    def create_assignment(self, course, title, description, due_date, max_score, pass_score):
+        """Create an assignment for a course."""
+        assignment = self.create(
+            course=course,
+            title=title,
+            description=description,
+            due_date=due_date,
+            max_score=max_score,
+            pass_score=pass_score
+        )
+        course.add_assignment(assignment)
+        return assignment

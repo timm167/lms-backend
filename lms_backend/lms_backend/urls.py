@@ -17,10 +17,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from core import views
+from rest_framework.authtoken.views import obtain_auth_token
+
 
 urlpatterns = [
     # Django admin
     path('admin/', admin.site.urls),
+
+    # API authentication
+    path('token/', obtain_auth_token, name='api_token_auth'),
+
 
     # Users
     path('users/', views.UserListCreateView.as_view(), name='user-list-create'),
@@ -49,4 +55,6 @@ urlpatterns = [
     # Enrollments
     path('enrollments/', views.EnrollmentListCreateView.as_view(), name='enrollment-list-create'),
     path('enrollments/<int:pk>/', views.EnrollmentDetailView.as_view(), name='enrollment-detail'),
+
+
 ]
