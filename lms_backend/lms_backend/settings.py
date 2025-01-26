@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'core.apps.CoreConfig',
     'django_extensions',
+    'webpack_loader'
 
 ]
 
