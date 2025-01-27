@@ -2,32 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from .managers import CourseManager, StudentManager, TeacherManager, AdminManager, UserManager, LessonManager, AssignmentManager
 
-# Model notes:
-# - The User model is a subclass of Django’s AbstractUser model.
-# - The Student, Teacher, and Admin models are subclasses of User.
-# - The Course model represents a course in the LMS.
-# - The Lesson model represents a lesson within a course.
-# - The Assignment model represents an assignment within a course.
-# - The Enrollment model represents a student's enrollment in a course.
-
-# Field types:
-# - OneToOneField means that each user can have only one corresponding student, teacher, or admin.
-# - ManyToManyField means that a user can be enrolled in multiple courses, and a course can have multiple students.
-# - CharField is a field for storing text data.
-# - TextField is a field for storing longer text data.
-# - ForeignKey is a field for creating a many-to-one relationship with another model. i.e. Many lessons can belong to one course.
-# - URLField is a field for storing URLs.
-# - DateTimeField is a field for storing date and time data.
-# - IntegerField is a field for storing integer data.
-
-# Other notes:
-# - Use cascade delete for related models to ensure data integrity.
-# - Use set null as I don't want to delete the course if the instructor is deleted. (Not sure exactly how to handle this yet)
-
-# Future models:
-# - Add a model for storing student grades.
-# - Add a model for storing student submissions.
-# - Add a model for storing completed courses.
 
 #------------------------------------------------------------#
 # User models
@@ -57,13 +31,17 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     def save(self, *args, **kwargs):
+        if self.password and not self.password.startswith('pbkdf2_sha256$'):
+            self.set_password(self.password)  
         super().save(*args, **kwargs)
-        if self.role == 'student' and not hasattr(self, 'student'):
-            Student.objects.get_or_create(user=self)
-        elif self.role == 'teacher' and not hasattr(self, 'teacher'):
-            Teacher.objects.get_or_create(user=self)
-        elif self.role == 'admin' and not hasattr(self, 'admin'):
-            Admin.objects.get_or_create(user=self)
+        if not self.pk:  
+            if self.role == 'student' and not hasattr(self, 'student'):
+                Student.objects.get_or_create(user=self)
+            elif self.role == 'teacher' and not hasattr(self, 'teacher'):
+                Teacher.objects.get_or_create(user=self)
+            elif self.role == 'admin' and not hasattr(self, 'admin'):
+                Admin.objects.get_or_create(user=self)
+
 
         
 

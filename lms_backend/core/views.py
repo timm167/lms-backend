@@ -1,5 +1,12 @@
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework import permissions
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.utils.decorators import method_decorator
+
 
 from rest_framework import generics
 from core.models import User, Student, Teacher, Course, Lesson, Assignment, Enrollment
@@ -14,8 +21,32 @@ from core.serializers import (
 )
 
 from core.permissions import IsTeacherOrAdmin, IsStudentOrAdmin, IsStudentOrTeacherOrAdmin
+from django.contrib.auth import login, authenticate
+from core.authentication import DebugTokenAuthentication
+from django.shortcuts import render
 
-# CRUD Permissions for Views
+def index(request):
+    return render(request, 'index.html')
+
+# @method_decorator(csrf_exempt, name='dispatch')
+class MyLoginView(APIView):
+    authentication_classes = []  
+    permission_classes = [AllowAny]
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(request, username=username, password=password)
+        print("user:", user)
+        if user is not None:
+            login(request, user)
+            token, created = Token.objects.get_or_create(user=user)
+
+            return Response({'message': 'Login successful',
+                             "token": token.key}, status=status.HTTP_200_OK)
+        return Response({'error': 'Permission Error'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
 
 # Users
 class UserListCreateView(generics.ListCreateAPIView):

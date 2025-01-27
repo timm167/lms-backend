@@ -18,14 +18,21 @@ from django.contrib import admin
 from django.urls import path
 from core import views
 from rest_framework.authtoken.views import obtain_auth_token
+from core.views import MyLoginView
 
 
 urlpatterns = [
     # Django admin
     path('admin/', admin.site.urls),
 
+    # Frontend
+    path('', views.index, name='index'),
+
     # API authentication
     path('token/', obtain_auth_token, name='api_token_auth'),
+
+    # Login
+    path('login/', MyLoginView.as_view(), name='login'),
 
 
     # Users
