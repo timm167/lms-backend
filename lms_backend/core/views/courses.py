@@ -2,13 +2,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from core.models import Course, Lesson, Assignment
 from core.serializers import CourseSerializer, LessonSerializer, AssignmentSerializer
-from .permissions import IsTeacherOrAdmin
+from .permissions import IsSelfTeacherOrAdmin
 
 # Courses
 class CourseListCreateView(generics.ListCreateAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [IsTeacherOrAdmin]
+    permission_classes = [IsSelfTeacherOrAdmin]
 
 class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Course.objects.all()
@@ -16,7 +16,7 @@ class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method in ['DELETE', 'PUT', 'PATCH']:
-            return [IsTeacherOrAdmin()]
+            return [IsSelfTeacherOrAdmin()]
         return [IsAuthenticated()]
 
 
@@ -27,7 +27,7 @@ class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
 class LessonListCreateView(generics.ListCreateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsTeacherOrAdmin]
+    permission_classes = [IsSelfTeacherOrAdmin]
 
     def perform_create(self, serializer):
         print("creating lesson")
@@ -46,7 +46,7 @@ class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method in ['DELETE', 'PUT', 'PATCH']:
-            return [IsTeacherOrAdmin()]
+            return [IsSelfTeacherOrAdmin()]
         return [IsAuthenticated()]
 
 
@@ -57,7 +57,7 @@ class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
 class AssignmentListCreateView(generics.ListCreateAPIView):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
-    permission_classes = [IsTeacherOrAdmin]
+    permission_classes = [IsSelfTeacherOrAdmin]
 
     
 
@@ -67,5 +67,5 @@ class AssignmentDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method in ['DELETE', 'PUT', 'PATCH']:
-            return [IsTeacherOrAdmin()]
+            return [IsSelfTeacherOrAdmin()]
         return [IsAuthenticated()]

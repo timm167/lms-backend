@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from ..models import Student, Course, Enrollment
+from core.models import Student, Course, Enrollment
+from .courses import CourseSerializer
+from .users import StudentSerializer
 
 class EnrollmentSerializer(serializers.ModelSerializer):
     student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())

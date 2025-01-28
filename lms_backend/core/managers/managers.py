@@ -14,7 +14,7 @@ class UserManager(BaseUserManager):
         """
         Create and return a regular user with the associated role model.
         """
-        from ..models.models import Student, Teacher, Admin
+        from core.models import Student, Teacher, Admin
 
         # Re-validate the fields in backend
         if not username:
@@ -66,14 +66,14 @@ class UserManager(BaseUserManager):
 
 class CourseManager(models.Manager):
     def create_lesson(self, course, title, content, lesson_no):
-        from ..models.models import Lesson
+        from core.models import Lesson
         """Create a lesson and add it to the course."""
         lesson = Lesson.objects.create(course=course, title=title, content=content, lesson_no=lesson_no)
         course.add_lesson(lesson) 
         return lesson
 
     def create_assignment(self, course, title, description, due_date, max_score, pass_score):
-        from ..models.models import Assignment
+        from core.models import Assignment
         """Create an assignment for a course."""
         assignment = Assignment.objects.create(
             course=course,
@@ -91,7 +91,7 @@ class CourseManager(models.Manager):
         print(f"{student.username} enrolled in {self.title}.")
 
     def unenroll_student(self, student):
-        from ..models.models import Enrollments
+        from core.models import Enrollments
         """Unenroll a student from the course."""
         self.students.remove(student)
         Enrollments.objects.filter(student=student, course=self).delete()
@@ -131,7 +131,7 @@ class CourseManager(models.Manager):
 class StudentManager(models.Manager):
     
     def browse_courses(self):
-        from ..models.models import Course
+        from core.models import Course
         """Return a list of all available courses."""
         return Course.objects.all()
 
@@ -163,7 +163,7 @@ class StudentManager(models.Manager):
 
 class AdminManager(models.Manager):
     def create_course(self, title, description, instructor):
-        from ..models.models import Course
+        from core.models import Course
         """Create a course and assign an instructor."""
         course = Course.objects.create(
             title=title, 
@@ -182,7 +182,7 @@ class AdminManager(models.Manager):
 class TeacherManager(models.Manager):
 
     def create_course(self, title, description):
-        from ..models.models import Course
+        from core.models import Course
         """Create a course and assign the teacher."""
         course = Course.objects.create(
             title=title,

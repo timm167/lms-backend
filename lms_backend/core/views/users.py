@@ -1,8 +1,8 @@
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser
 from rest_framework import generics
 from core.models import User, Student, Teacher, Admin
 from core.serializers import UserSerializer, StudentSerializer, TeacherSerializer
-from .permissions import IsTeacherOrAdmin, IsStudentOrAdmin
+from .permissions import IsSelfTeacherOrAdmin, IsSelfStudentOrAdmin
 
 #------------------------------------------------------------#
 # Users
@@ -26,7 +26,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
 class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
-    permission_classes = [IsStudentOrAdmin]
+    permission_classes = [IsSelfStudentOrAdmin]
 
 
 #------------------------------------------------------------#
@@ -36,13 +36,7 @@ class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
 class TeacherDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
-
-    def get_permissions(self):
-        if self.request.method in ['DELETE']:
-            return [IsAdminUser()]
-        if self.request.method in ['PUT', 'PATCH']:
-            return [IsTeacherOrAdmin()]
-        return [IsAuthenticated()] 
+    permission_classes = [IsSelfTeacherOrAdmin]
 
 #------------------------------------------------------------#
 # Admins

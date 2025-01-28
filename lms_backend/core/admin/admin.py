@@ -1,8 +1,5 @@
 from django.contrib import admin
-from ..models import User, Student, Teacher, Admin, Course, Lesson, Assignment, Enrollment
-
-## I don't think anything else needs to be done here. 
-## The default admin interface won't be used anyway as I will serve API endpoints to React app.
+from core.models import User, Student, Teacher, Admin, Course, Lesson, Assignment, Enrollment
 
 # Register your models here.
 admin.site.register(User)
