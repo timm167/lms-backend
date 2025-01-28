@@ -1,7 +1,6 @@
 from django.test import TestCase
 from django.test import TestCase
-from core.models import Course, Lesson
-from core.serializers import LessonSerializer
+from lms_backend.core.models.models import Course, Lesson
 
 class LessonCreationTestCase(TestCase):
 

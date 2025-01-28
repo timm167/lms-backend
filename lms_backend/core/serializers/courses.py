@@ -1,53 +1,13 @@
 from rest_framework import serializers
-from .models import User
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff']
-
-#------------------------------------------------------------#
-
-from .models import Teacher
-
-class TeacherSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-
-    class Meta:
-        model = Teacher
-        fields = ['id', 'user', 'teaching_courses']
-
-#------------------------------------------------------------#
-
-from .models import Student
-
-class StudentSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-    enrolled_courses = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-
-    class Meta:
-        model = Student
-        fields = ['id', 'user', 'enrolled_courses']
-
-#------------------------------------------------------------#
-
-from .models import Admin
-
-class AdminSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-
-    class Meta:
-        model = Admin
-        fields = ['id', 'user']
-
-#------------------------------------------------------------#
-
-from .models import Lesson
+from ..models import Lesson, Assignment, Course, Teacher, Student
 
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
         fields = ['id', 'course', 'title', 'content', 'lesson_no', 'video_url']
+
+    # I can't remember why I did this. 
+    # It might be obsolete I need to investigate.
 
     def create(self, validated_data):
         course = validated_data.get('course')
@@ -67,7 +27,6 @@ class LessonSerializer(serializers.ModelSerializer):
 
 #-----------------------------------------------------------#
 
-from .models import Assignment
 
 class AssignmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -76,7 +35,6 @@ class AssignmentSerializer(serializers.ModelSerializer):
 
 #-----------------------------------------------------------#
 
-from .models import Course
 
 class CourseSerializer(serializers.ModelSerializer):
     instructor = serializers.PrimaryKeyRelatedField(queryset=Teacher.objects.all())
@@ -98,12 +56,3 @@ class CourseSerializer(serializers.ModelSerializer):
 
 
 #-----------------------------------------------------------#
-
-from .models import Enrollment
-
-class EnrollmentSerializer(serializers.ModelSerializer):
-    student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())
-    course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
-    class Meta:
-        model = Enrollment
-        fields = ['id', 'student', 'course', 'enrollment_date', 'completed']

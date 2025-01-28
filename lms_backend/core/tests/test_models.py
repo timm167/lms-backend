@@ -1,5 +1,5 @@
 from django.test import TestCase
-from core.models import User, Student, Teacher, Admin
+from lms_backend.core.models.models import User, Student, Teacher, Admin
 
 class UserCreationTests(TestCase):
 
@@ -7,12 +7,13 @@ class UserCreationTests(TestCase):
         self.user_manager = User.objects
 
     def test_create_student_user_creates_student(self):
-        student_user = self.user_manager.create(
+        student_user = self.user_manager.create_user(
             username='student', 
             password='password', 
             role='student',
             email='student@example.com'
         )
+        print(student_user)
         self.assertIsInstance(student_user, User)
         self.assertTrue(Student.objects.filter(user=student_user).exists())
         self.assertFalse(Teacher.objects.filter(user=student_user).exists())

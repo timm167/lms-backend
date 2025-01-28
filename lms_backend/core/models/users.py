@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from .managers import CourseManager, StudentManager, TeacherManager, AdminManager, UserManager, LessonManager, AssignmentManager
+from ..managers.managers import CourseManager, StudentManager, TeacherManager, AdminManager, UserManager
 
 
 #------------------------------------------------------------#
@@ -22,6 +22,7 @@ class User(AbstractBaseUser):
         ('teacher', 'Teacher'),
         ('student', 'Student'),
     ]
+
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
 
 
@@ -31,15 +32,21 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     def save(self, *args, **kwargs):
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!
+        # This ensures that the password is hashed before saving
+        # It wasn't working before so I added this. Not sure if it's the best way to do it.
+        # Failure happened when adding a user through the interface. When viewed in db browser, the password was not hashed.
+        # As a result, the authentication failed at login. This works well but I would like to understand why the original method failed.
         if self.password and not self.password.startswith('pbkdf2_sha256$'):
             self.set_password(self.password)  
         super().save(*args, **kwargs)
         if not self.pk:  
-            if self.role == 'student' and not hasattr(self, 'student'):
+            if self.role == 'student':
                 Student.objects.get_or_create(user=self)
-            elif self.role == 'teacher' and not hasattr(self, 'teacher'):
+            elif self.role == 'teacher' :
                 Teacher.objects.get_or_create(user=self)
-            elif self.role == 'admin' and not hasattr(self, 'admin'):
+            elif self.role == 'admin':
                 Admin.objects.get_or_create(user=self)
 
 
@@ -94,54 +101,7 @@ class Admin(models.Model):
         return f"{self.user.username} ({self.user.role})"
 
 
-# Course models
-class Course(models.Model):
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    instructor = models.ForeignKey(Teacher, related_name="courses_taught", on_delete=models.SET_NULL, null=True, blank=True)
-    students = models.ManyToManyField("Student", related_name="courses_enrolled", blank=True)
-    lessons = models.ManyToManyField("Lesson", related_name="courses_with_lessons", blank=True)
-    assignments = models.ManyToManyField("Assignment", related_name="courses_with_assignments", blank=True)
-    objects = CourseManager()
-
-    def __str__(self):
-        return self.title
 
 
-# A lesson within a course
-class Lesson(models.Model):
-    course = models.ForeignKey(Course, related_name="lessons_in_course", on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
-    content = models.TextField(blank=True, null=True)
-    lesson_no = models.IntegerField(null=True, blank=True) 
-    video_url = models.URLField(blank=True, null=True)
-    objects = LessonManager()
-
-    def __str__(self):
-        return self.title
-    
 
 
-# An assignment within a course
-class Assignment(models.Model):
-    course = models.ForeignKey(Course, related_name="assignments_in_course", on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    due_date = models.DateTimeField(null=True, blank=True)
-    max_score = models.IntegerField(null=True, blank=True)
-    pass_score = models.IntegerField(null=True, blank=True)
-    objects = AssignmentManager()
-
-    def __str__(self):
-        return self.title
-
-
-# A model to represent a student's enrollment in a course
-class Enrollment(models.Model):
-    student = models.ForeignKey(Student, related_name="enrollments", on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, related_name="enrollments_in_course", on_delete=models.CASCADE)
-    enrollment_date = models.DateTimeField(auto_now_add=True)
-    completed = models.BooleanField(default=False)
-    
-    def __str__(self):
-        return f"{self.student.user.username} enrolled in {self.course.title}"
