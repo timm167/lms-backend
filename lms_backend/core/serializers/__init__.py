@@ -1,7 +1,7 @@
-from .users import UserSerializer
-from .students import StudentSerializer
-from .teachers import TeacherSerializer
-from .admins import AdminSerializer
-from .courses import CourseSerializer
-from .course_objects import LessonSerializer, AssignmentSerializer
-from .enrollments import EnrollmentSerializer
+from .users_serializers import UserSerializer
+from .students_serializers import StudentSerializer
+from .teachers_serializers import TeacherSerializer
+from .admins_serializers import AdminSerializer
+from .courses_serializers import CourseSerializer, BrowseCourseSerializer
+from .course_objects_serializers import LessonSerializer, AssignmentSerializer
+from .enrollments_serializers import EnrollmentSerializer

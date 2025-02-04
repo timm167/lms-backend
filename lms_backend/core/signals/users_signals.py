@@ -1,7 +1,6 @@
 from django.db.models.signals import post_save, post_delete, m2m_changed
 from django.dispatch import receiver
-from core.models import Teacher, Student, Admin
-
+from core.models import Teacher, Student, Admin, Assignment, Lesson, Course, Enrollment
 
 # Delete user when teacher, student, or admin is deleted
 @receiver(post_delete, sender=Teacher)

@@ -1,13 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from ..managers.managers import CourseManager, StudentManager, TeacherManager, AdminManager, UserManager
-from .users import Student, Teacher, Admin, User
+from core.managers import CourseManager
+from .user_models import Teacher
 
 # Course models
 class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    instructor = models.ForeignKey(Teacher, related_name="courses_taught", on_delete=models.SET_NULL, null=True, blank=True)
+    teacher = models.ForeignKey(Teacher, related_name="courses_taught", on_delete=models.SET_NULL, null=True, blank=True)
     students = models.ManyToManyField("Student", related_name="courses_enrolled", blank=True)
     lessons = models.ManyToManyField("Lesson", related_name="courses_with_lessons", blank=True)
     assignments = models.ManyToManyField("Assignment", related_name="courses_with_assignments", blank=True)

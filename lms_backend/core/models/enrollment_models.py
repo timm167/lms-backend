@@ -1,8 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from ..managers.managers import CourseManager, StudentManager, TeacherManager, AdminManager, UserManager
-from .users import Student, Teacher, Admin, User
-from .courses import Course
+from .user_models import Student
+from .course_models import Course
 
 # A model to represent a student's enrollment in a course
 class Enrollment(models.Model):

@@ -1,21 +1,6 @@
-from .accounts import MyLoginView, MySignupView
-from .users import UserListCreateView, UserDetailView
-
-# Create unified views here. 
-
-# Add signals to update enrollments dynamically!!!!
-
-# Includes the following views:
-# TeacherView
-# StudentView
-# AdminView
-# CourseView
-# UserView
-# LessonByCourseView
-# AssignmentByCourseView
-# EnrollmentsView
-
-# Once I have these views, expose methods to the frontend to interact with them.
-# This will define my user facing data model.
-# This should take about a day to complete.
-# Then I can sort the frontend out. (3-4 days)
+from .manager_views.user_manager_views import UserCreateView, UserDeleteView, UserTypeView
+from .users_views import UserListView, UserDetailView, StudentDetailView, TeacherDetailView, AdminDetailView, StudentListView, TeacherListView, AdminListView
+from .courses_views import CourseListView, CourseDetailView, LessonDetailView, AssignmentDetailView, BrowseCoursesView
+from .enrollments_views import EnrollmentListView, EnrollmentDetailView
+from .manager_views.course_manager_views import CourseManagerView
+from .login_views import LoginView

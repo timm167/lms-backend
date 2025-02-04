@@ -1,7 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from ..managers.managers import CourseManager, StudentManager, TeacherManager, AdminManager, UserManager
-
+from django.contrib.auth.models import AbstractBaseUser
+from core.managers import UserManager
 
 #------------------------------------------------------------#
 # User models
@@ -31,27 +30,6 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
-    def save(self, *args, **kwargs):
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!
-        # This ensures that the password is hashed before saving
-        # It wasn't working before so I added this. Not sure if it's the best way to do it.
-        # Failure happened when adding a user through the interface. When viewed in db browser, the password was not hashed.
-        # As a result, the authentication failed at login. This works well but I would like to understand why the original method failed.
-        if self.password and not self.password.startswith('pbkdf2_sha256$'):
-            self.set_password(self.password)  
-        super().save(*args, **kwargs)
-        if not self.pk:  
-            if self.role == 'student':
-                Student.objects.get_or_create(user=self)
-            elif self.role == 'teacher' :
-                Teacher.objects.get_or_create(user=self)
-            elif self.role == 'admin':
-                Admin.objects.get_or_create(user=self)
-
-
-        
-
     def is_admin(self):
         return self.role == 'admin'
 
@@ -71,30 +49,27 @@ class User(AbstractBaseUser):
         return f"{self.username} ({self.role})"
 
 
-# Subclass Student: Specific functionality for students
+# Linked Object: Specific functionality for students
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     enrolled_courses = models.ManyToManyField('Course', related_name='students_in_course', blank=True)
-    objects = StudentManager()
 
     def __str__(self):
         return self.user.username
 
 
-# Subclass Teacher: Specific functionality for teachers
+# Linked Object: Specific functionality for teachers
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     teaching_courses = models.ManyToManyField('Course', related_name='teachers_in_course', blank=True)
-    objects = TeacherManager()
 
     def __str__(self):
         return self.user.username
 
 
-# Subclass Admin: Specific functionality for admins
+# Linked Object:  Specific functionality for admins
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE) 
-    objects = AdminManager()
     is_staff = models.BooleanField(default=True)
     
     def __str__(self):

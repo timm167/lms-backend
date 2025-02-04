@@ -6,14 +6,14 @@ class StudentSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source='user.first_name')
     last_name = serializers.CharField(source='user.last_name')
     email = serializers.CharField(source='user.email')
-    id = serializers.IntegerField(source='user.id')
+    user_id = serializers.IntegerField(source='user.id')
 
     class Meta:
         model = Student
-        fields = ['id', 'email', 'first_name', 'last_name', 'enrolled_courses']
+        fields = ['user_id', 'email', 'first_name', 'last_name', 'enrolled_courses']
 
-    def get_courses(self, obj):
-        from .courses import CourseDisplaySerializer
-        return CourseDisplaySerializer(obj.courses.all(), many=True).data
+    def get_enrolled_courses(self, obj):
+        from .courses_serializers import CourseDisplaySerializer
+        return CourseDisplaySerializer(obj.enrolled_courses.all(), many=True).data
 
 #------------------------------------------------------------#
