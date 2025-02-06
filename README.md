@@ -254,7 +254,7 @@ path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail')
 
  Note that each fetch is sent with a token in the header i.e.
 
-```
+```javascript
     const token = localStorage.getItem('token');
 
     const response = await fetch(`http://localhost:8000/${rowType}/${id}/`, {
@@ -302,7 +302,7 @@ For example, to **add a teacher**:
 
    The backend processes the instruction (`add_teacher`) and updates the course.
    
-   ```
+   ```python
            elif action == 'add_teacher':
             teacher = Teacher.objects.get(user_id=user_id)
             course_manager.add_teacher(course, teacher)
