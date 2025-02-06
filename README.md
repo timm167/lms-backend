@@ -268,7 +268,7 @@ path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail')
 
 This returns detailed course information, including associated **lessons** and **assignments**, which are nested. These can be observed by being clicked to make a get request to their detail endpoints.
 
-```
+```python
     # Lessons
     path('lessons/<int:pk>/', LessonDetailView.as_view(), name='lesson-detail'),
 
