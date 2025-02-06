@@ -183,3 +183,175 @@ All views have custom permissions.
   - Students can only see their courses.
   - Teachers can only access their courses.
   - Admins have full access.
+
+## Example Actions
+
+An example flow would be for an Admin to find a course, check it's Lessons and Assignments, then change which teacher is teaching the course.
+
+### Accessing Course Data
+
+In the frontend, to view a list of courses as an **admin**, navigate to the **Home Page** and click on **Courses**.
+
+This triggers a `GET` request to the following endpoint:
+
+```python
+path('courses/', CourseListView.as_view(), name='course-list')
+```
+
+### Course List View
+
+The `CourseListView` returns a list of courses. The implementation is as follows:
+
+```python
+# Courses
+class CourseListView(generics.ListAPIView):
+    serializer_class = CourseSerializer
+    permission_classes = [IsSelfTeacherOrAdmin]
+    
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Course.objects.all()
+        return Course.objects.filter(teacher=user.teacher)
+```
+
+⚠️ **Note**: While permissions are implemented, they are not relevant here as admins have full access.
+
+### Course Serializer
+
+The course data is serialized efficiently to prevent unnecessary nested data expansion:
+
+```python
+class CourseSerializer(serializers.ModelSerializer):
+    teacher = UserDisplaySerializer()
+    students = UserDisplaySerializer(many=True)
+    lessons = LessonDisplaySerializer(many=True)
+    assignments = AssignmentDisplaySerializer(many=True)
+    
+    class Meta:
+        model = Course
+        fields = [
+            'id', 
+            'title', 
+            'description', 
+            'teacher', 
+            'students', 
+            'lessons', 
+            'assignments', 
+        ]
+```
+
+<img width="1218" alt="Screenshot 2025-02-06 at 22 55 16" src="https://github.com/user-attachments/assets/a7bf613c-42d0-49d5-96ed-96bc0eb97455" />
+
+
+### Viewing Course Details
+
+Clicking on a course retrieves its **ID** and makes another `GET` request to:
+
+```python
+path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail')
+```
+
+ Note that each fetch is sent with a token in the header i.e.
+
+```
+    const token = localStorage.getItem('token');
+
+    const response = await fetch(`http://localhost:8000/${rowType}/${id}/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+        },
+    });
+```
+
+This returns detailed course information, including associated **lessons** and **assignments**, which are nested. These can be observed by being clicked to make a get request to their detail endpoints.
+
+```
+    # Lessons
+    path('lessons/<int:pk>/', LessonDetailView.as_view(), name='lesson-detail'),
+
+    # Assignments
+    path('assignments/<int:pk>/', AssignmentDetailView.as_view(), name='assignment-detail'),
+```
+
+<img width="507" alt="Screenshot 2025-02-06 at 22 55 59" src="https://github.com/user-attachments/assets/5e6e0f49-b5c4-42e2-b3f6-8c05c91a61be" />
+
+### Managing Courses
+
+To modify course data, use the **Course Manager**:
+
+```python
+path('course-manager/', CourseManagerView.as_view(), name='course-manager')
+```
+<img width="459" alt="Screenshot 2025-02-06 at 22 57 49" src="https://github.com/user-attachments/assets/124d892f-6831-4dd2-ac5e-d2690d575c4e" />
+
+For example, to **add a teacher**:
+1. Fetch a list of teachers:
+
+    ```python
+    path('teachers/', TeacherListView.as_view(), name='teacher-list')
+    ```
+    Which displays to the user and when they click change...
+
+2. Calls the **Course Manager API**, passing:
+   - `course_id` (from the course list)
+   - `user_id` (from the serialized teacher list)
+   - action: `add_teacher`
+
+   The backend processes the instruction (`add_teacher`) and updates the course.
+   
+   ```
+           elif action == 'add_teacher':
+            teacher = Teacher.objects.get(user_id=user_id)
+            course_manager.add_teacher(course, teacher)
+            return Response({"message": "Teacher added successfully."}, status=status.HTTP_200_OK)
+   ```
+
+This updates the database and the React frontend by making another GET request for the updated object. 
+
+---
+
+
+## Deploying Server Locally
+
+To run the server locally using `requirements.txt`, follow these steps:
+
+### Prerequisites
+Ensure you have **Python** installed.
+
+### Steps to Deploy Backend Locally
+
+1. **Clone the Repository**
+   ```sh
+   git clone <repository-url>
+   cd <repository-folder>
+   ```
+
+2. **Create a Virtual Environment** (optional but recommended)
+   ```sh
+   python -m venv venv
+   source venv/bin/activate  # On macOS/Linux
+   venv\Scripts\activate     # On Windows
+   ```
+
+3. **Install Dependencies**
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+4. **Run Migrations**
+   ```sh
+   python manage.py migrate
+   ```
+
+6. **Start the Development Server**
+   ```sh
+   python manage.py runserver
+   ```
+
+7. **Access the Application**
+   Clone and run the frontend or access with swagger UI using http://localhost:8000/swagger/.
+
+   Link to fronted (including deployment instructions): https://github.com/timm167/lms-frontend
