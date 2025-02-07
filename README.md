@@ -402,8 +402,6 @@ This updates the database and the React frontend by making another GET request f
 
 ## Deploying Server Locally
 
-To run the server locally using `requirements.txt`, follow these steps:
-
 ### Prerequisites
 Ensure you have **Python** installed.
 
@@ -451,6 +449,7 @@ Ensure you have **Python** installed.
   - ⚡ Vite
   - 🎨 Material UI
   - 📦 NPM (Node Package Manager)
+  - 🛠️ React Testing Library + Jest
 
   
 
@@ -459,9 +458,9 @@ Ensure you have **Python** installed.
   - 🚀 Django
   - 🎯 Django REST Framework (DRF)
   - 📜 Swagger UI
-  - 🗄️ SQLlite
+  - 🗄️ SQLite
   - 🔒 Django REST Authtoken
-  - 🛠️ Django TestCase + React Testing Library
+  - 🛠️ Django TestCase
   
 
 
