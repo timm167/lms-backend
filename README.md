@@ -445,8 +445,6 @@ Ensure you have **Python** installed.
 
 ## Technical Stack (Full-Stack)
 
-## 🛠️ Tech Stack
-
 - **Frontend:**
   - 🟨 JavaScript
   - ⚛️ React
