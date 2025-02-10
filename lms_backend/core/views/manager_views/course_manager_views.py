@@ -5,6 +5,8 @@ from core.models import Course, Student, Teacher
 from core.managers import CourseManager
 from ..permissions.course_manager_permissions import check_course_manager_permissions
 
+default_video_url = 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4'
+
 
 class CourseManagerView(APIView):
     
@@ -57,31 +59,31 @@ class CourseManagerView(APIView):
         # Lessons
         #------------------------------------------------------------#
 
-        elif action == 'create_lesson':
-            course_manager.create_lesson(course, title, content)
+        elif action == 'add_lesson':
+            course_manager.add_lesson(course, title, content, video_url=default_video_url) 
             return Response({"message": "Lesson created successfully."}, status=status.HTTP_201_CREATED)
         
         elif action == 'delete_lesson':
-            lesson = course.lessons.get(lesson_id=item_id)
-            course_manager.delete_lesson(lesson)
-            return Response({"message": "Lesson deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+            lesson = course.lessons.get(id=item_id)
+            course_manager.delete_lesson(course, lesson)
+            return Response({"message": "Lesson deleted successfully."}, status=status.HTTP_200_OK)
         
 
         #------------------------------------------------------------#
         # Assignments
         #------------------------------------------------------------#
 
-        elif action == 'create_assignment':
+        elif action == 'add_assignment':
             due_date = request.data.get('due_date', None)
             max_score = request.data.get('max_score', None)
             pass_score = request.data.get('pass_score', None)
-            course_manager.create_assignment(course, title, description, due_date, max_score, pass_score)
+            course_manager.add_assignment(course, title, description, due_date, max_score, pass_score)
             return Response({"message": "Assignment created successfully."}, status=status.HTTP_201_CREATED)
         
         elif action == 'delete_assignment':
-            assignment = course.assignments.get(assignment_id=item_id)
-            course_manager.delete_assignment(assignment)
-            return Response({"message": "Assignment deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+            assignment = course.assignments.get(id=item_id)
+            course_manager.delete_assignment(course, assignment)
+            return Response({"message": "Assignment deleted successfully."}, status=status.HTTP_200_OK)
         
         #------------------------------------------------------------#
         # Enrollments

@@ -31,7 +31,7 @@ class BrowseCoursesView(generics.ListAPIView):
 class LessonDetailView(generics.RetrieveAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated()]
+    permission_classes = [IsAuthenticated]
 
 
 #------------------------------------------------------------#
@@ -41,4 +41,4 @@ class LessonDetailView(generics.RetrieveAPIView):
 class AssignmentDetailView(generics.RetrieveAPIView):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
-    permission_classes = [IsAuthenticated()]
+    permission_classes = [IsAuthenticated]

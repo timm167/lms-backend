@@ -8,14 +8,6 @@ def check_course_manager_permissions(user, user_id, action, course=None):
     elif action == 'delete_course':
         return user.is_staff
     
-    # Create lesson: Admins and teachers can create lessons
-    elif action == 'create_lesson':
-        return is_self_teacher(user, course)
-
-    # Create assignment: Admins and teachers can create assignments
-    elif action == 'create_assignment':
-        return is_self_teacher(user, course)
-    
     # Enroll student: Admins and students can enroll students
     elif action == 'enroll_student':
         return is_self_student(user, user_id)
@@ -37,7 +29,7 @@ def check_course_manager_permissions(user, user_id, action, course=None):
         return is_self_teacher(user, course)
     
     # Remove lesson: Admins and teachers can remove lessons
-    elif action == 'remove_lesson':
+    elif action == 'delete_lesson':
         return is_self_teacher(user, course)
     
     # Add assignment: Admins and teachers can add assignments
@@ -45,7 +37,7 @@ def check_course_manager_permissions(user, user_id, action, course=None):
         return is_self_teacher(user, course)
     
     # Remove assignment: Admins and teachers can remove assignments
-    elif action == 'remove_assignment':
+    elif action == 'delete_assignment':
         return is_self_teacher(user, course)
 
     # Default case for undefined actions

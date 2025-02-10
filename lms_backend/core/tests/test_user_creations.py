@@ -21,7 +21,7 @@
 #         self.assertEqual(student_user.student.user, student_user)
 
 #     def test_create_teacher_user_creates_teacher(self):
-#         teacher_user = self.user_manager.create(
+#         teacher_user = self.user_manager.create_user(
 #             username='teacher', 
 #             password='password', 
 #             role='teacher',
@@ -35,7 +35,7 @@
 
 
 #     def test_create_admin_user_creates_admin(self):
-#         admin_user = self.user_manager.create(
+#         admin_user = self.user_manager.create_user(
 #             username='admin', 
 #             password='password', 
 #             role='admin',

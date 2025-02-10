@@ -112,7 +112,6 @@ def generate_lessons_for_course(course):
             course=course,
             title=title,
             content=f"This is a lesson on {title} in the {course.title} course.",
-            lesson_no=index,
             video_url=f"https://example.com/{course.title.lower()}_{title.lower().replace(' ', '_')}"
         )
         print(f"Lesson '{title}' created for course: {course.title}")

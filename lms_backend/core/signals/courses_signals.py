@@ -31,7 +31,8 @@ def delete_course(sender, instance, **kwargs):
 # Update teacher whenever a course is assigned to a teacher
 @receiver(post_save, sender=Course)
 def update_teacher(sender, instance, **kwargs):
-    instance.teacher.teaching_courses.add(instance)
+    if instance.teacher:
+        instance.teacher.teaching_courses.add(instance)
 
 @receiver(post_delete, sender=Course)
 def remove_teacher(sender, instance, **kwargs):

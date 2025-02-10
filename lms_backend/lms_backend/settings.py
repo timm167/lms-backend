@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'drf_yasg',
 ]
 
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
 
 # Only added corsheaders for frontend connection.
 MIDDLEWARE = [

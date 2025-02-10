@@ -20,17 +20,18 @@ class CourseManager(models.Manager):
 
 
     #------------------------------------------------------------#
-    # Lessons
+    # Lessons 
     #------------------------------------------------------------#
 
-    def create_lesson(self, course, title, content, lesson_no):
+    def add_lesson(self, course, title, content, video_url):
         from core.models import Lesson
-        lesson = Lesson.objects.create(course=course, title=title, content=content, lesson_no=lesson_no)
-        course.add_lesson(lesson) 
+        video_url = str(video_url)
+        lesson = Lesson.objects.create(course=course, title=title, content=content, video_url=video_url)
+        course.lessons.add(lesson) 
         return lesson
     
-    def delete_lesson(self, lesson):
-        self.lessons.remove(lesson)
+    def delete_lesson(self, course, lesson):
+        course.lessons.remove(lesson)
         lesson.delete()
     
 
@@ -38,7 +39,7 @@ class CourseManager(models.Manager):
     # Assignments
     #------------------------------------------------------------#
 
-    def create_assignment(self, course, title, description, due_date, max_score, pass_score):
+    def add_assignment(self, course, title, description, due_date, max_score=100, pass_score=60):
         from core.models import Assignment
         assignment = Assignment.objects.create(
             course=course,
@@ -48,11 +49,11 @@ class CourseManager(models.Manager):
             max_score=max_score,
             pass_score=pass_score
         )
-        course.add_assignment(assignment) 
+        course.assignments.add(assignment) 
         return assignment
     
-    def delete_assignment(self, assignment):
-        self.assignments.remove(assignment)
+    def delete_assignment(self, course, assignment):
+        course.assignments.remove(assignment)
         assignment.delete()
 
 
