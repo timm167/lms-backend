@@ -27,7 +27,6 @@ from core.views import (
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from core.generate import RefreshData
-from django.http import HttpResponse
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -51,10 +50,6 @@ urlpatterns = [
 
     # Generate data
     path('data/refresh/', RefreshData.as_view(), name='generate-data'),
-
-    path('base-url/', lambda request: HttpResponse("Base URL is correct"), name='base-url-check'),
-
-
 
     # Swagger UI
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
