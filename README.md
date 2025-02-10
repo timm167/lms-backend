@@ -449,7 +449,7 @@ Ensure you have **Python** installed.
   - ⚡ Vite
   - 🎨 Material UI
   - 📦 NPM (Node Package Manager)
-  - 🛠️ React Testing Library + Jest
+  - 🛠️ React Testing Library + Vitest
 
   
 
