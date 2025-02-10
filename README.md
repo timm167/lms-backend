@@ -184,6 +184,7 @@ The above gives a pretty good view of my thinking.
   - Students can only create or delete their own enrollments.
   - Teachers can only create and edit their own courses.
   - Admins have full access.
+- More detail as to how this is ensured can be found under 'Testing', 'Permissions' below.
 
 Example Custom Permission: 
 ``` python
@@ -462,7 +463,43 @@ Ensure you have **Python** installed.
   - 🔒 Django REST Authtoken
   - 🛠️ Django TestCase
   
+# Testing
 
+## Running Tests
+
+## Testing infrastructure
+
+### Permissions
+
+The most important thing to test is the permissions granted to different auth types. There's 3 types of endpoints to consider here.
+
+1. User Manager endpoints (test_user_manager_views.py)
+   - Only Admins should be able to delete users
+   - Only admins should be able to create users with additional permissions i.e. non-student users
+   - There's no other way of accessing these than through user_manager_views (POST, DELETE) so testing these will be sufficient.
+
+2. Course Manager endpoints (test_course_manager_views.py)
+   - Only Admins should be able to delete courses, change the course teacher, or add/remove students (other than self-enrollment)
+   - Students shouldn't be able to edit any course details except for their own enrollment in it (enroll/unenroll)
+   - Teachers should be able to create courses and add/remove lessons or assignments but nothing else.
+   - There's no other way of accessing these other than through course_managager_views (POST) so testing this is sufficient.
+  
+3. GET requests (test_get_permissions.py)
+   - Only admins should be able to see full user views i.e. email, username, password
+   - Otherwise permiss
+
+### Functionality 
+
+Most functionality is tested via the same tests as the permissions as they test the ability for each user type to perform actions. 
+
+- **test_course_manager_views** tests all add/remove for courses, lessons, assignments.
+  
+- **test_course_manager_views** tests changing who is teaching or enrolled in a course.
+    - Also checks that student objects, course objects, teacher objects, and enrollment objects are updated in accordance.
+      
+- **test_user_deletions** tests that when a teacher, student, or admin is deleted it deletes the corresponding user object.
+  
+- **test_user_creations** tests that when a user with role teacher, student, or admin is created it creates the corresponding type of object.
 
 ## Simplified File Structure
 ```
