@@ -465,10 +465,6 @@ Ensure you have **Python** installed.
   
 # Testing
 
-## Running Tests
-
-## Testing infrastructure
-
 ### Permissions
 
 The most important thing to test is the permissions granted to different auth types. There's 3 types of endpoints to consider here.
@@ -500,6 +496,12 @@ Most functionality is tested via the same tests as the permissions as they test 
 - **test_user_deletions** tests that when a teacher, student, or admin is deleted it deletes the corresponding user object.
   
 - **test_user_creations** tests that when a user with role teacher, student, or admin is created it creates the corresponding type of object.
+
+### Running Tests
+
+Navigate to `Backend/lms_backend` and run `python manage.py test`.
+
+-------------------------------------------------------------------------------------------
 
 ## Simplified File Structure
 ```
