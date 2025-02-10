@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -32,18 +31,18 @@ DEBUG = True
 # I think this is to do with cors
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'lms-backend-dl7z.onrender.com']
 
-# Allows my vite frontend to access.
-# How do these tokens actually work? Are they very different to bearer tokens?
+
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:5173',
+    'http://localhost:5173', 'https://timm167.github.io'
 ]
+
+CSRF_COOKIE_SECURE = True
 
 # Just for now to avoid headaches.
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 
-# Some of this might be redundant I messed around with it a lot.
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
