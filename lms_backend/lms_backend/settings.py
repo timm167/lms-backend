@@ -30,7 +30,7 @@ DEBUG = True
 
 # Helps connect the frontend to the backend, accepts requests from the frontend. 
 # I think this is to do with cors
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'lms-backend-dl7z.onrender.com']
 
 # Allows my vite frontend to access.
 # How do these tokens actually work? Are they very different to bearer tokens?
