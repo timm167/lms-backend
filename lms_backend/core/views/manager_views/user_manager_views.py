@@ -23,10 +23,12 @@ class UserCreateView(APIView):
         response = validate_user_data(request, username, password, email, role)
 
         if response == 'create':
+            print("Creating user")
             user = User.objects.create_user(username=username, password=password, role=role, email=email, first_name=first_name, last_name=last_name)
             return Response({'message': 'User created successfully', "user_id": user.id}, status=status.HTTP_201_CREATED)
 
         if response == 'signup':
+            print("Signing up user")
             user = User.objects.create_user(username=username, password=password, role=role, email=email, first_name=first_name, last_name=last_name)
             login(request, user)
             token, _ = Token.objects.get_or_create(user=user)
