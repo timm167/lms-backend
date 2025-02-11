@@ -1,6 +1,6 @@
 # Set Up and Usage
 
-For simplified instructions on recommended setup and usage, checkout
+For simplified instructions on recommended setup and usage, checkout https://github.com/timm167/lms-frontend-local/blob/main/USAGE.md
 
 ---
 
