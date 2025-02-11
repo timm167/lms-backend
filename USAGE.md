@@ -1,5 +1,9 @@
 # Set Up and Usage
 
+For simplified instructions on recommended setup and usage, checkout
+
+---
+
 ## Remote Server access (not recommended)
 - The easiest way to use the site is to access https://timm167.github.io/lms-frontend/
 - The backend is hosted remotely on render
