@@ -34,12 +34,6 @@ def generate_courses():
         ("Music", "Study of musical theory and practice."),
         ("Physical Education", "Development of physical fitness and sports skills."),
         ("Biology", "Examination of living organisms and life processes."),
-        ("Chemistry", "Understanding chemical reactions and properties of matter."),
-        ("Physics", "Study of the laws of nature and physical phenomena."),
-        ("Geography", "Exploration of Earth's landscapes and environments."),
-        ("Economics", "Introduction to economic principles and systems."),
-        ("Philosophy", "Examination of fundamental questions about existence and knowledge."),
-        ("Psychology", "Study of human behavior and mental processes.")
     ]
     
     for title, description in course_data:
@@ -62,7 +56,7 @@ def generate_users():
                 role=role
             )
     
-    for _ in range(5):
+    for _ in range(30):
         first_name = fake.first_name()
         last_name = fake.last_name()
         User.objects.create_user(
@@ -74,7 +68,7 @@ def generate_users():
             role="student"
         )
     
-    for _ in range(2):
+    for _ in range(8):
         first_name = fake.first_name()
         last_name = fake.last_name()
         User.objects.create_user(
@@ -112,7 +106,7 @@ def generate_lessons_for_course(course):
             course=course,
             title=title,
             content=f"This is a lesson on {title} in the {course.title} course.",
-            video_url=f"https://example.com/{course.title.lower()}_{title.lower().replace(' ', '_')}"
+            video_url="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
         )
         print(f"Lesson '{title}' created for course: {course.title}")
 
