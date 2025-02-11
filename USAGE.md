@@ -20,12 +20,12 @@ Ensure you have **Python** installed.
 1. **Clone the Repository**
    ```sh
    git clone https://github.com/timm167/lms-backend
-   cd lms-backend
+   cd lms-backend/lms-backend
    ```
 
 2. **Create a Virtual Environment** (optional but recommended)
    ```sh
-   python -m venv venv
+   python3 -m venv venv
    source venv/bin/activate  # On macOS/Linux
    venv\Scripts\activate     # On Windows
    ```
