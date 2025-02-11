@@ -29,11 +29,6 @@ def generate_courses():
         ("Science", "Introduction to scientific principles and experiments."),
         ("History", "Study of historical events and civilizations."),
         ("English", "Understanding literature, grammar, and writing skills."),
-        ("Computer Science", "Basics of programming and computational thinking."),
-        ("Art", "Exploration of visual arts and creative expression."),
-        ("Music", "Study of musical theory and practice."),
-        ("Physical Education", "Development of physical fitness and sports skills."),
-        ("Biology", "Examination of living organisms and life processes."),
     ]
     
     for title, description in course_data:
@@ -45,30 +40,32 @@ def generate_courses():
 def generate_users():
     predefined_users = ['student', 'teacher', 'admin']
     
+    users = []
     for role in predefined_users:
         if not User.objects.filter(username=role).exists():
-            User.objects.create_user(
+            users.append(User(
                 username=role,
                 first_name=role.capitalize(),
                 last_name="User",
                 email=f"{role}@example.com",
                 password=role,
                 role=role
-            )
+            ))
     
-    for _ in range(30):
+    
+    for _ in range(16):
         first_name = fake.first_name()
         last_name = fake.last_name()
-        User.objects.create_user(
+        users.append(User(
             username=f"{first_name.lower()}{last_name.lower()}",
             first_name=first_name,
             last_name=last_name,
             email=f"{first_name.lower()}.{last_name.lower()}@example.com",
             password="password",
             role="student"
-        )
+        ))
     
-    for _ in range(8):
+    for _ in range(4):
         first_name = fake.first_name()
         last_name = fake.last_name()
         User.objects.create_user(
@@ -79,6 +76,9 @@ def generate_users():
             password="password",
             role="teacher"
         )
+    
+    User.objects.bulk_create(users) 
+
 
 
 def generate_enrollments():
@@ -96,7 +96,6 @@ def generate_lessons_for_course(course):
         "Science": ["Physics Basics", "Chemistry Fundamentals", "Biology Overview"],
         "History": ["Ancient Civilizations", "Medieval Times", "Modern History"],
         "English": ["Grammar Essentials", "Literary Analysis", "Creative Writing"],
-        "Computer Science": ["Programming Basics", "Data Structures", "Algorithms"]
     }
     
     lessons = lesson_mapping.get(course.title, ["General Introduction", "Main Concepts", "Advanced Topics"])
