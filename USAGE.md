@@ -5,6 +5,8 @@
 - The backend is hosted remotely on render
 - Note that it is hosted on a free plan so uptime is not gauranteeed. It is redeployed every two hours so downtime should not last longer than that.
 
+Check Server availability at: https://stats.uptimerobot.com/0pKZ4j5FWK
+
 ## Deploying Server Locally
 ⚠️ **Note**: If deploying server locally, access via https://timm167.github.io/lms-frontend-local/ or deploy the frontend locally (instructions-below)
 The other link will not work
