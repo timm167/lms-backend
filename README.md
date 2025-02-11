@@ -458,7 +458,7 @@ Most functionality is tested via the same tests as the permissions as they test 
 
 ### Running Tests
 
-Navigate to `Backend/lms_backend` and run `python manage.py test`.
+Navigate to `Backend/lms_backend` and run `python manage.py test`. (checkout USAGE.md for instructions on deployment)
 
 -------------------------------------------------------------------------------------------
 
