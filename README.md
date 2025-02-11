@@ -401,12 +401,18 @@ This updates the database and the React frontend by making another GET request f
 
 # Set Up and Usage
 
+## Cloud
+- The easiest way to use the site is to access https://timm167.github.io/lms-frontend/
+- The backend is hosted remotely on render 
+
 ## Deploying Server Locally
+⚠️ **Note**: If deploying server locally, access via https://timm167.github.io/lms-frontend-local/ or deploy the frontend locally (instructions-below)
+The other link will not work
 
 ### Prerequisites
 Ensure you have **Python** installed.
 
-### Steps to Deploy Backend Locally
+### Steps to Deploy and Use Backend Locally
 
 1. **Clone the Repository**
    ```sh
@@ -439,8 +445,14 @@ Ensure you have **Python** installed.
 7. **Access the Application**
    Clone and run the frontend or access with swagger UI using http://localhost:8000/swagger/.
 
-   Link to frontend (including deployment instructions): https://github.com/timm167/lms-frontend
+## Deploying Frontend Locally
 
+1. 
+If using local server, clone https://timm167.github.io/lms-frontend-local/
+
+if using remote server, clone https://timm167.github.io/lms-frontend/
+
+2. 
 
 ## Technical Stack (Full-Stack)
 
@@ -451,8 +463,8 @@ Ensure you have **Python** installed.
   - 🎨 Material UI
   - 📦 NPM (Node Package Manager)
   - 🛠️ React Testing Library + Vitest + JSDOM
+  - 📡 GH-pages for deployment
 
-  
 
 - **Backend:**
   - 🐍 Python
@@ -462,6 +474,7 @@ Ensure you have **Python** installed.
   - 🗄️ SQLite
   - 🔒 Django REST Authtoken
   - 🛠️ Django TestCase
+  - 📡 Render for Deployment
   
 # Testing
 
