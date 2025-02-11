@@ -2,7 +2,7 @@
 
 This app is intended as a demo learning management system built using Django and React. This README documents the applications build and provides technical details about the app. 
 
-Recommended deployment: https://github.com/timm167/lms-frontend-local/blob/main/USAGE.md
+Recommended deployment instructions: https://github.com/timm167/lms-frontend-local/blob/main/USAGE.md
 
 Other deployment options: https://github.com/timm167/lms-backend/blob/main/USAGE.md
 
