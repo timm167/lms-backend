@@ -1,0 +1,13 @@
+name: Auto Deploy Render Every 2 Hours
+
+on:
+  schedule:
+    - cron: "0 */2 * * *" 
+  workflow_dispatch:  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deployment
+        run: curl -X POST "https://api.render.com/deploy/srv-cul76o3tq21c73fges6g?key=7THbVYA4Qhs"
