@@ -4,7 +4,7 @@
 - The easiest way to use the site is to access https://timm167.github.io/lms-frontend/
 - The backend is hosted remotely on render
 - Note that it is hosted on a free plan so uptime is not gauranteeed. It is redeployed every two hours so downtime should not last longer than that.
-⚠️ Playground features are unreliable on remote server due non-persisting data and memory limits.
+- ⚠️ Playground features are unreliable on remote server due non-persisting data and memory limits.
 
 Check Server availability at: https://stats.uptimerobot.com/0pKZ4j5FWK
 
