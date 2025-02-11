@@ -61,7 +61,7 @@ npm install
 npm run dev
 ```
 
-Go to http://localhost:5173/lms-frontend-local/
+Go to http://localhost:5173/lms-frontend-local/ (or check terminal for url)
 
 If using the remote server on render (not recommended)
 
@@ -72,5 +72,18 @@ npm install
 npm run dev
 ```
 
-Go to http://localhost:5173/lms-frontend/
+Go to http://localhost:5173/lms-frontend/ (or check terminal for url)
 
+### Use the App
+
+- This is a demo only app, it should not be used for other purposes.
+- Once both the backend and frontend are running, you should be able to use the site freely.
+- Data will not persist due to using a sqlite database
+- For navigation support, checkout the frontend documentation at https://github.com/timm167/lms-frontend
+
+## Questions
+
+Please feel free to reach out to me if you have any questions or you are having problems.
+
+Email: tim.charterii@gmail.com
+GitHub: https://github.com/timm167
