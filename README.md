@@ -420,6 +420,7 @@ This updates the database and the React frontend by making another GET request f
   - 🔒 Django REST Authtoken
   - 🛠️ Django TestCase
   - 📡 Render for Deployment
+  - 🤖 Uptime Robot for uptime
   
 # Testing
 
