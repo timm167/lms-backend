@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework import status
 import random
 from rest_framework.views import APIView
+from django.utils import timezone
+from datetime import datetime
 
 class RefreshData(APIView):
     def post(self, request):
@@ -40,31 +42,32 @@ def generate_courses():
 def generate_users():
     predefined_users = ['student', 'teacher', 'admin']
     
-    users = []
+    # Loop through and create each user individually
     for role in predefined_users:
         if not User.objects.filter(username=role).exists():
-            users.append(User(
+            User.objects.create_user(
                 username=role,
                 first_name=role.capitalize(),
                 last_name="User",
                 email=f"{role}@example.com",
                 password=role,
                 role=role
-            ))
+            )
     
-    
+    # Create 16 students with random names
     for _ in range(16):
         first_name = fake.first_name()
         last_name = fake.last_name()
-        users.append(User(
+        User.objects.create_user(
             username=f"{first_name.lower()}{last_name.lower()}",
             first_name=first_name,
             last_name=last_name,
             email=f"{first_name.lower()}.{last_name.lower()}@example.com",
             password="password",
             role="student"
-        ))
+        )
     
+    # Create 4 teachers with random names
     for _ in range(4):
         first_name = fake.first_name()
         last_name = fake.last_name()
@@ -76,8 +79,6 @@ def generate_users():
             password="password",
             role="teacher"
         )
-    
-    User.objects.bulk_create(users) 
 
 
 
@@ -113,11 +114,12 @@ def generate_assignments_for_course(course):
     assignment_titles = ["Quiz 1", "Midterm Project", "Final Exam"]
     
     for title in assignment_titles:
+        due_date = timezone.make_aware(datetime.combine(fake.date_this_year(), datetime.min.time()))
         Assignment.objects.create(
             course=course,
             title=title,
             description=f"{title} for the {course.title} course.",
-            due_date=fake.date_this_year(),
+            due_date=due_date,
             max_score=100,
             pass_score=50
         )
