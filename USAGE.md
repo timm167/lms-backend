@@ -1,6 +1,6 @@
 # Set Up and Usage
 
-## Cloud
+## Remote Server access
 - The easiest way to use the site is to access https://timm167.github.io/lms-frontend/
 - The backend is hosted remotely on render
 - Note that it is hosted on a free plan so uptime is not gauranteeed. It is redeployed every two hours so downtime should not last longer than that.
@@ -74,6 +74,7 @@ npm run dev
 
 Go to http://localhost:5173/lms-frontend/ (or check terminal for url)
 
+--- 
 ### Use the App
 
 - This is a demo only app, it should not be used for other purposes.
@@ -81,6 +82,7 @@ Go to http://localhost:5173/lms-frontend/ (or check terminal for url)
 - Data will not persist due to using a sqlite database
 - For navigation support, checkout the frontend documentation at https://github.com/timm167/lms-frontend
 
+---
 ## Questions
 
 Please feel free to reach out to me if you have any questions or you are having problems.
