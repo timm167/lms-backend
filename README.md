@@ -1,4 +1,4 @@
-# Django App Development Notes
+# Django Learning Management System App Backend
 
 ## Initial Setup & Backend-First Approach
 
@@ -204,7 +204,7 @@ class IsSelfStudentOrAdmin(BasePermission):
         return False
 ```
 
-## 5. View Structure Overview
+## View Structure Overview
 
 ### General View Architecture:
 - **GET**: Fetch list or detail data.
@@ -230,7 +230,7 @@ class IsSelfStudentOrAdmin(BasePermission):
 ### Other Views:
 - Basically all objects have a list view and detail view to display in tables or as solo objects.
 
-## 6. API Endpoints Overview
+## API Endpoints Overview
 
 ### 1. Admin Section:
 - `/admin/`: Default Django admin interface.
@@ -399,61 +399,6 @@ This updates the database and the React frontend by making another GET request f
 
 ----------------------------------------------------------------------
 
-# Set Up and Usage
-
-## Cloud
-- The easiest way to use the site is to access https://timm167.github.io/lms-frontend/
-- The backend is hosted remotely on render 
-
-## Deploying Server Locally
-⚠️ **Note**: If deploying server locally, access via https://timm167.github.io/lms-frontend-local/ or deploy the frontend locally (instructions-below)
-The other link will not work
-
-### Prerequisites
-Ensure you have **Python** installed.
-
-### Steps to Deploy and Use Backend Locally
-
-1. **Clone the Repository**
-   ```sh
-   git clone https://github.com/timm167/lms-backend
-   cd lms-backend
-   ```
-
-2. **Create a Virtual Environment** (optional but recommended)
-   ```sh
-   python -m venv venv
-   source venv/bin/activate  # On macOS/Linux
-   venv\Scripts\activate     # On Windows
-   ```
-
-3. **Install Dependencies**
-   ```sh
-   pip install -r requirements.txt
-   ```
-
-4. **Run Migrations**
-   ```sh
-   python manage.py migrate
-   ```
-
-6. **Start the Development Server**
-   ```sh
-   python manage.py runserver
-   ```
-
-7. **Access the Application**
-   Clone and run the frontend or access with swagger UI using http://localhost:8000/swagger/.
-
-## Deploying Frontend Locally
-
-1. 
-If using local server, clone https://timm167.github.io/lms-frontend-local/
-
-if using remote server, clone https://timm167.github.io/lms-frontend/
-
-2. 
-
 ## Technical Stack (Full-Stack)
 
 - **Frontend:**
@@ -495,7 +440,7 @@ The most important thing to test is the permissions granted to different auth ty
   
 3. GET requests (test_get_permissions.py)
    - Only admins should be able to see full user views i.e. email, username, password
-   - Otherwise permiss
+   - Otherwise permiss MARK HERE
 
 ### Functionality 
 
