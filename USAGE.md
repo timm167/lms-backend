@@ -61,13 +61,16 @@ npm install
 npm run dev
 ```
 
-If using the remote server on render (not recommended)
-```
+Go to http://localhost:5173/lms-frontend-local/
 
+If using the remote server on render (not recommended)
+
+```
 git clone https://github.com/timm167/lms-frontend.git
 cd lms-frontend-local
 npm install
 npm run dev
 ```
 
+Go to http://localhost:5173/lms-frontend/
 
