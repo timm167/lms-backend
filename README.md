@@ -1,18 +1,29 @@
 # Django Learning Management System App Backend
 
-## Initial Setup & Backend-First Approach
+This app is intended as a demo learning management system built using Django and React. This README documents the applications build and provides technical details about the app. 
 
-### Reasoning for Backend-First Development:
-- App structured as API-only backend with a separate frontend.
-- Prioritising the backend first helps define API endpoints early, avoiding unnecessary UI elements.
+Recommended deployment: https://github.com/timm167/lms-frontend-local/blob/main/USAGE.md
 
-## Project Setup & Core Models
+Other deployment options: 
 
-### All Model Types:
+
+## 1. Project Setup & Core Models
+
+### 1.1. Project Setup:
+
+- The project uses Django's standard structure sans templates so as to create an API only backend.
+
+---
+
+### 1.2. All Model Types:
 
 `User, Student, Teacher, Admin, Course, Lesson, Assignment, Enrollment`
 
--- `User` can have a connceted object of `Admin`, `Student`, or `Teacher` each granting the different permissions and relational properties.
+---
+
+
+### 1.3. User:
+Has an associated (OneToOne) object of `Admin`, `Student`, or `Teacher` each granting the different permissions and relational properties.
 
 ```python
 # User model: AbstractBaseUser subclass
@@ -33,8 +44,11 @@ class User(AbstractBaseUser):
 
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
 ```
+---
 
--- `Course` contains `Lesson`s and `Assignment`s as well as a list of the `Student` objects related as well as the `Teacher`.
+
+### 1.4. Course
+Contains `Lesson`'s, `Assignment`'s, the `Teacher`, and a list of `Student` objects.
 
 ```python
 # Course models
@@ -51,7 +65,11 @@ class Course(models.Model):
         return self.title
 ```
 
--- `Enrollment` tracks when a `Student` enrolled and can be queried by a `Student` to see which courses they are enrolled in.
+---
+
+
+### 1.5. Enrollment
+Tracks when a `Student` enrolled and can be queried by a `Student` to see which courses they are enrolled in.
 
 ```python
 class Enrollment(models.Model):
@@ -62,10 +80,10 @@ class Enrollment(models.Model):
     
     def __str__(self):
         return f"{self.student.user.username} enrolled in {self.course.title}"
-
 ```
 
-### Users & Roles:
+---
+## 2. Users & Roles:
 - Users can be Admins, Teachers, or Students.
 - **Custom User Model**: Extends Django’s `AbstractUser`.
   - Core fields: `username`, `email`, `first_name`, `last_name`, `is_staff`, `is_superuser`, `role`.
@@ -81,13 +99,14 @@ class Enrollment(models.Model):
   elif role == 'admin':
       Admin.objects.get_or_create(user=user)
 ```
-
-### User Subclasses & Relationships:
+---
+### 2.1. User Subclasses & Relationships:
 - **Student**: One-to-one with `User`, uses signals for cascading deletes. Tracks `enrolled_courses` via many-to-many.
 - **Teacher**: Similar to Student model but tracks `teaching_courses`.
 - **Admin**: No course tracking; has `is_staff=True` for admin access.
+---
 
-### Courses & Relationships:
+## 3. Courses & Relationships:
 - **Key Relationships**:
   - **One-to-One**: Course has one teacher.
   - **Many-to-Many**: Students enroll in multiple courses.
@@ -96,8 +115,8 @@ class Enrollment(models.Model):
 - **Enrollments**: 
   - Seperately store students, enrollment_data, and course. Avoids complexity and nested data. Updates via signals.
 
-
-### Cascade Deletion & Signals:
+---
+### 3.1.Cascade Deletion & Signals:
 - One-to-one relationships use `on_delete=models.CASCADE` to ensure deletion consistency across models.
 - The reverse, if needed, happens through signals. i.e.
 ```python
@@ -106,10 +125,10 @@ class Enrollment(models.Model):
 def delete_teacher_user(sender, instance, **kwargs):
     instance.user.delete()
 ```
-
-## Serializers & Data Structure
-
-### Serializers:
+---
+## 4. Serializers & Data Structure
+---
+### 4.1. Serializers:
 - Serializers structure API responses and handle data passed to views.
 - Display serializers are used for nested data i.e. course in `student.enrolled_courses` displays only title and id.
 
@@ -126,13 +145,13 @@ class CourseDisplaySerializer(serializers.ModelSerializer):
 - Display serializers in the `id` and `title` format are used whenever an object is part of another objects view.
 - Avoid excessive nesting to keep responses lightweight.
 
-
-### ID-Based Data Structure:
+---
+### 4.2. ID-Based Data Structure:
 - Built around IDs rather than deep nesting (e.g., `course_id` instead of embedding full course objects).
 - Keeps responses fast and data consistent.
 
-
-### User Serializers:
+---
+### 4.3. User Serializers:
 - Users are referenced by `user_id` only instead of their teacher, admin, or student id.
 - This simplifies data tracking significantly as by getting user_id you have access to all the information
 
@@ -152,14 +171,14 @@ class StudentSerializer(serializers.ModelSerializer):
         from .courses_serializers import CourseDisplaySerializer
         return CourseDisplaySerializer(obj.enrolled_courses.all(), many=True).data
 ```
-The above gives a pretty good view of my thinking.
-1. Using a display serializer to show the title of each course the student is enrolled in.
-2. This also lets the frontend grab the ID and use this for fetches.
-3. Customizing the serialized ID to it's parent objects id (`user_id`) to simplify.
+a. Using a display serializer to show the title of each course the student is enrolled in.
+b. This also lets the frontend grab the ID and use this for fetches.
+c. Customizing the serialized ID to it's parent objects id (`user_id`) to simplify.
 
-## Permissions Overview
-
-### Role-Based Access:
+---
+## 5. Permissions Overview
+---
+### 5.1 Role-Based Access:
 
 - **Students**:
   - **View**: courses, own enrollments
@@ -174,12 +193,12 @@ The above gives a pretty good view of my thinking.
 - **Admins**:
   - **View**: Full access to all data.
   - **Modify**: Can create, update, delete users, courses, assignments, etc.
-
-### Specific Permissions for Actions:
+---
+### 5.2. Specific Permissions for Actions:
 - Admins and teachers can manage courses and enrolments via the `/course-manager/` endpoint.
 - Teachers and students have restricted access based on their role.
-
-### Data Integrity:
+---
+### 5.3. Data Integrity:
 - Ensures users can only access data relevant to them:
   - Students can only create or delete their own enrollments.
   - Teachers can only create and edit their own courses.
@@ -203,78 +222,78 @@ class IsSelfStudentOrAdmin(BasePermission):
         
         return False
 ```
-
-## View Structure Overview
-
-### General View Architecture:
+---
+## 6. View Structure Overview
+---
+### 6.1. General View Architecture:
 - **GET**: Fetch list or detail data.
 - **POST**: Handle creation or updates.
 - **DELETE**: Only used for deleting users.
-
-### Login View:
+---
+### 6.2. Login View:
 - Open to all, returns token for authentication.
-
-### User Manager Views:
+---
+### 6.3. User Manager Views:
 - **Create User View**: Admins can create users (admins, teachers, students).
 - Otherwise, anyone can create a student user (by signing up).
 - Only Admins can create non-student users.
-
-### Course Manager View:
+---
+### 6.4. Course Manager View:
 - Allows creation, updating, and deletion of courses, lessons, and enrollments through POST requests.
 - Actions passed via named actions (e.g., "add_teacher", "enroll_student", "delete_course").
 - `course_manager` POST requests is the only way to interact with, create, and delete courses.
-
-### Browse Courses View:
+---
+### 6.5. Browse Courses View:
 - Displays available courses to authenticated users.
-
-### Other Views:
+---
+### 6.5. Other Views:
 - Basically all objects have a list view and detail view to display in tables or as solo objects.
-
-## API Endpoints Overview
-
-### 1. Admin Section:
+---
+## 7. API Endpoints Overview
+---
+### 7.1. Admin Section:
 - `/admin/`: Default Django admin interface.
-
-### 2. Authentication:
+---
+### 7.2. Authentication:
 - `/token/`: POST to obtain an authentication token.
-
-### 3. Accounts:
+---
+### 7.3. Accounts:
 - `/accounts/login/`: POST for user login (returns token).
 - `/accounts/signup/`: POST for user registration.
-
-### 4. User Management:
+---
+### 7.4. User Management:
 - `/users/create/`: POST for creating a new user.
 - `/users/delete/`: DELETE to delete a user.
 - `/user/type/`: GET to fetch the role of the authenticated user.
-
-### 5. Course Manager:
+---
+### 7.5. Course Manager:
 - `/course-manager/`: POST for course management (create, update, delete).
-
-### 6. Users:
+---
+### 7.6. Users:
 - `/students/`: GET to list all students. (admin only)
 - `/teachers/`: GET to list all teachers. (admin only)
 - `/admins/`: GET to list all admins. (admin only)
-
-### 7. Courses:
+---
+### 7.7. Courses:
 - `/courses/`: GET to list all courses. 
 - `/courses/browse/`: GET to list simplified course view.
 - `/courses/int:pk/`: GET for detailed course info.
-
-### 10. Lessons:
+---
+### 7.8. Lessons:
 - `/lessons/int:pk/`: GET for lesson details.
-
-### 11. Assignments:
+---
+### 7.9. Assignments:
 - `/assignments/int:pk/`: GET for assignment details.
-
-### 12. Enrolments:
+---
+### 7.10. Enrolments:
 - `/enrollments/`: GET to list enrollments.
 - `/enrollments/int:pk/`: GET for specific enrolment details.
 
-## Example Actions
-
+## 8. Example Actions
+---
 This is an example flow. An Admin wants to to find a course, check it's Lessons and Assignments, then change which teacher is teaching the course.
-
-### Accessing Course Data
+---
+### 8.1 Accessing Course Data
 
 In the frontend, to view a list of courses as an **admin**, navigate to the **Home Page** and click on **Courses**.
 
@@ -283,8 +302,8 @@ This triggers a `GET` request to the following endpoint:
 ```python
 path('courses/', CourseListView.as_view(), name='course-list')
 ```
-
-### Course List View
+---
+### 8.2. Course List View
 
 The `CourseListView` returns a list of courses. The implementation is as follows:
 
@@ -302,8 +321,8 @@ class CourseListView(generics.ListAPIView):
 ```
 
 ⚠️ **Note**: While permissions are implemented, they are not relevant here as admins have full access.
-
-### Course Serializer
+---
+### 8.3. Course Serializer
 
 The course data is serialized efficiently to prevent unnecessary nested data expansion:
 
@@ -329,8 +348,8 @@ class CourseSerializer(serializers.ModelSerializer):
 
 <img width="1218" alt="Screenshot 2025-02-06 at 22 55 16" src="https://github.com/user-attachments/assets/a7bf613c-42d0-49d5-96ed-96bc0eb97455" />
 
-
-### Viewing Course Details
+---
+### 8.4. Viewing Course Details
 
 Clicking on a course retrieves its **ID** and makes another `GET` request to:
 
@@ -364,7 +383,9 @@ This returns detailed course information, including associated **lessons** and *
 
 <img width="507" alt="Screenshot 2025-02-06 at 22 55 59" src="https://github.com/user-attachments/assets/5e6e0f49-b5c4-42e2-b3f6-8c05c91a61be" />
 
-### Managing Courses
+---
+
+### 8.5. Managing Courses
 
 To modify course data, use the **Course Manager**:
 
@@ -399,7 +420,7 @@ This updates the database and the React frontend by making another GET request f
 
 ----------------------------------------------------------------------
 
-## Technical Stack (Full-Stack)
+## 9. Technical Stack (Full-Stack)
 
 - **Frontend:**
   - 🟨 JavaScript
@@ -422,9 +443,9 @@ This updates the database and the React frontend by making another GET request f
   - 📡 Render for Deployment
   - 🤖 Uptime Robot for uptime
   
-# Testing
-
-### Permissions
+## 10. Testing
+---
+### 10.1. Permissions
 
 The most important thing to test is the permissions granted to different auth types. There's 3 types of endpoints to consider here.
 
@@ -443,7 +464,8 @@ The most important thing to test is the permissions granted to different auth ty
    - Only admins should be able to see full user views i.e. email, username, password
    - Otherwise permiss MARK HERE
 
-### Functionality 
+---
+### 10.2. Functionality 
 
 Most functionality is tested via the same tests as the permissions as they test the ability for each user type to perform actions. 
 
@@ -456,13 +478,14 @@ Most functionality is tested via the same tests as the permissions as they test 
   
 - **test_user_creations** tests that when a user with role teacher, student, or admin is created it creates the corresponding type of object.
 
-### Running Tests
+---
+### 10.3. Running Tests
 
-Navigate to `Backend/lms_backend` and run `python manage.py test`. (checkout USAGE.md for instructions on deployment)
+Navigate to `Backend/lms_backend` and run `python manage.py test`. (to deploy go to https://github.com/timm167/lms-frontend-local/blob/main/USAGE.md)
 
--------------------------------------------------------------------------------------------
+---
 
-## Simplified File Structure
+## 11. Simplified File Structure
 ```
 📁 lms_backend
  ├── 📁 core
