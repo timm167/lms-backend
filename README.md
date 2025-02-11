@@ -6,7 +6,7 @@ Recommended deployment instructions: https://github.com/timm167/lms-frontend-loc
 
 Other deployment options: https://github.com/timm167/lms-backend/blob/main/USAGE.md
 
-
+---
 ## 1. Project Setup & Core Models
 
 ### 1.1. Project Setup:
