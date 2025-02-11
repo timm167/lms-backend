@@ -5,15 +5,17 @@
 - The backend is hosted remotely on render
 - Note that it is hosted on a free plan so uptime is not gauranteeed. It is redeployed every two hours so downtime should not last longer than that.
 - Limited memory means that the 'generate data' button in playground does not work well unless deployed locally.
+- Also the database may take time to update meaning the experience is slow.
 
 Check Server availability at: https://stats.uptimerobot.com/0pKZ4j5FWK
 
-## Deploying Server Locally
-⚠️ **Note**: If deploying server locally, access via https://timm167.github.io/lms-frontend-local/ or deploy the frontend locally (instructions-below)
-The other link will not work
+## Deploying Server Locally (Recommended)
+⚠️ **Note**: If deploying server locally, you MUST deploy the frontend locally. Instructions below.
 
 ### Prerequisites
 Ensure you have **Python** installed.
+
+Ensure local port 8000 is free, otherwise manually change the base_url in the frontend at src/service/base_url.
 
 ### Steps to Deploy and Use Backend Locally
 
@@ -50,8 +52,22 @@ Ensure you have **Python** installed.
 
 ## Deploying Frontend Locally
 
-1. 
-- If using local server, clone https://timm167.github.io/lms-frontend-local/
-- if using remote server, clone https://timm167.github.io/lms-frontend/
+If deploying server locally, in a seperate terminal
 
-2. 
+```
+git clone https://github.com/timm167/lms-frontend-local.git
+cd lms-frontend-local
+npm install
+npm run dev
+```
+
+If using the remote server on render (not recommended)
+```
+
+git clone https://github.com/timm167/lms-frontend.git
+cd lms-frontend-local
+npm install
+npm run dev
+```
+
+
